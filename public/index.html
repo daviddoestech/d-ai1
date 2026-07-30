@@ -720,6 +720,7 @@ async function send(){
     const data = await res.json();
     removeThinking();
     addMsg(data.reply,'ai');
+speak(data.reply);
   }catch{
     removeThinking();
     addMsg('Something went wrong — please try again.','ai');
