@@ -584,8 +584,9 @@ header {
     <!-- INPUT -->
     <div class="input-wrap">
       <div class="input-inner">
-        <input id="msg" placeholder="Ask D-AI anything…" autocomplete="off"/>
-        <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+        <<input id="msg" placeholder="Ask D-AI anything…" autocomplete="off"/>
+<button class="voice-btn" onclick="listen()">🎤</button>
+<button class="send-btn" id="sendBtn" onclick="send()">➤</button>
       </div>
       <div class="input-hint">D-AI can make mistakes — double-check important info.</div>
     </div>
@@ -738,6 +739,64 @@ async function newChat(){
 
 /* enter */
 input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+
+   function listen(){
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+    alert("Voice input is not supported in this browser");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = ()=>{
+    console.log("Listening...");
+  };
+
+  recognition.onresult = (event)=>{
+    const text = event.results[0][0].transcript;
+
+    input.value = text;
+
+    send();
+  };
+
+  recognition.onerror = (event)=>{
+    console.log("Voice error:", event.error);
+  };
+
+  recognition.start();
+}
+
+
+async function speak(text){
+
+  const res = await fetch("/voice",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      text:text
+    })
+  });
+
+  const audioBlob = await res.blob();
+
+  const audioURL = URL.createObjectURL(audioBlob);
+
+  const audio = new Audio(audioURL);
+
+  audio.play();
+}
 </script>
 </body>
 </html>
