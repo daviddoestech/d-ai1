@@ -1,51 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#212121">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="theme-color"
+    content="#212121"
+>
 
 <title>D-AI</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet"
+>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
 
 /* =========================================================
-   BASE
+   VARIABLES
 ========================================================= */
 
 :root {
-    --bg: #212121;
-    --sidebar: #171717;
-    --sidebar-hover: #2a2a2a;
 
-    --panel: #2f2f2f;
-    --panel-hover: #383838;
+    --bg: #212121;
+
+    --sidebar: #171717;
+
+    --sidebar-hover: #252525;
+
+    --input: #2f2f2f;
+
+    --input-hover: #363636;
 
     --border: rgba(255,255,255,.10);
-    --border-soft: rgba(255,255,255,.07);
+
+    --border-light: rgba(255,255,255,.07);
 
     --text: #ececec;
-    --muted: #a7a7a7;
-    --muted-2: #777;
 
-    --accent: #4d8dff;
-    --accent-hover: #6da2ff;
+    --muted: #a0a0a0;
 
-    --danger: #ef4444;
+    --muted-dark: #777;
 
-    --font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --mono: "Fira Code", monospace;
+    --accent: #4f8cff;
 
-    --sidebar-width: 260px;
-    --max-chat-width: 860px;
+    --accent-hover: #6c9fff;
+
+    --white: #ffffff;
+
+    --font:
+        "Inter",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    --mono:
+        "Fira Code",
+        monospace;
+
+    --sidebar-width: 264px;
+
+    --chat-width: 880px;
+
 }
+
+
+/* =========================================================
+   RESET
+========================================================= */
 
 * {
     box-sizing: border-box;
@@ -53,308 +95,419 @@
 
 html,
 body {
+
     width: 100%;
     height: 100%;
+
     margin: 0;
+
 }
 
 body {
-    font-family: var(--font);
+
     background: var(--bg);
+
     color: var(--text);
+
+    font-family: var(--font);
+
     overflow: hidden;
+
 }
+
+button,
+textarea {
+
+    font-family: inherit;
+
+}
+
 
 /* =========================================================
    APP
 ========================================================= */
 
 .app {
+
     width: 100%;
     height: 100dvh;
+
     display: flex;
+
 }
+
 
 /* =========================================================
    SIDEBAR
 ========================================================= */
 
 .sidebar {
-    width: var(--sidebar-width);
-    height: 100%;
-    background: var(--sidebar);
 
-    display: flex;
-    flex-direction: column;
+    width: var(--sidebar-width);
+
+    height: 100%;
 
     flex-shrink: 0;
 
-    border-right: 1px solid rgba(255,255,255,.05);
+    background: var(--sidebar);
+
+    border-right:
+        1px solid rgba(255,255,255,.05);
+
+    display: flex;
+
+    flex-direction: column;
 
     z-index: 100;
 
-    transition: transform .25s ease;
+    transition:
+        transform .25s ease;
+
 }
 
-.sidebar-top {
-    padding: 12px;
+
+.sidebar-header {
+
+    padding: 14px 12px 8px;
+
 }
+
 
 .brand {
-    height: 44px;
+
+    height: 42px;
 
     display: flex;
-    align-items: center;
 
-    padding: 0 10px;
+    align-items: center;
 
     gap: 10px;
 
-    margin-bottom: 8px;
+    padding: 0 8px;
+
 }
 
-.brand-logo {
-    width: 28px;
-    height: 28px;
 
-    border-radius: 8px;
+.brand-icon {
 
-    background: #2f6fe4;
+    width: 29px;
+    height: 29px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    font-size: 14px;
+    border-radius: 8px;
+
+    background: #3b73d1;
+
     color: white;
+
+    font-size: 14px;
+
 }
 
-.brand-name {
+
+.brand-text {
+
     font-size: 15px;
+
     font-weight: 600;
+
     letter-spacing: -.2px;
+
 }
+
 
 .new-chat {
+
     width: 100%;
 
     height: 42px;
 
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 8px;
+    margin-top: 8px;
 
-    background: transparent;
-
-    color: var(--text);
-
-    font-family: var(--font);
-    font-size: 14px;
+    padding: 0 11px;
 
     display: flex;
-    align-items: center;
-    gap: 10px;
 
-    padding: 0 12px;
-
-    cursor: pointer;
-
-    transition:
-        background .15s ease,
-        border-color .15s ease;
-}
-
-.new-chat:hover {
-    background: var(--sidebar-hover);
-    border-color: rgba(255,255,255,.13);
-}
-
-.new-chat-icon {
-    font-size: 18px;
-    line-height: 1;
-    color: #ddd;
-}
-
-.sidebar-label {
-    padding: 18px 12px 8px;
-
-    color: #777;
-
-    font-size: 11px;
-    font-weight: 600;
-
-    text-transform: uppercase;
-
-    letter-spacing: .7px;
-}
-
-.suggestions {
-    padding: 0 8px;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 2px;
-}
-
-.suggestion {
-    width: 100%;
-
-    border: none;
-    background: transparent;
-
-    color: #c7c7c7;
-
-    border-radius: 7px;
-
-    padding: 9px 10px;
-
-    font-family: var(--font);
-    font-size: 13px;
-
-    display: flex;
     align-items: center;
 
     gap: 9px;
 
-    text-align: left;
+    color: #e8e8e8;
+
+    background: transparent;
+
+    border:
+        1px solid rgba(255,255,255,.10);
+
+    border-radius: 8px;
 
     cursor: pointer;
 
-    transition: background .12s ease;
+    font-size: 13px;
+
+    transition:
+        background .15s,
+        border-color .15s;
+
 }
 
-.suggestion:hover {
+
+.new-chat:hover {
+
     background: var(--sidebar-hover);
-    color: #fff;
+
+    border-color:
+        rgba(255,255,255,.15);
+
 }
 
-.suggestion-icon {
+
+.new-chat-plus {
+
+    font-size: 18px;
+
+    color: #bbb;
+
+}
+
+
+/* =========================================================
+   SIDEBAR SUGGESTIONS
+========================================================= */
+
+.sidebar-title {
+
+    padding:
+        18px 18px 8px;
+
+    color: #727272;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: .8px;
+
+}
+
+
+.sidebar-suggestions {
+
+    padding: 0 8px;
+
+}
+
+
+.sidebar-item {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 10px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: #c2c2c2;
+
+    text-align: left;
+
+    font-size: 12.5px;
+
+    cursor: pointer;
+
+}
+
+
+.sidebar-item:hover {
+
+    background: var(--sidebar-hover);
+
+    color: white;
+
+}
+
+
+.sidebar-item-icon {
+
     width: 20px;
+
+    color: #999;
 
     text-align: center;
 
-    opacity: .8;
 }
 
-.sidebar-bottom {
+
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
+
+.sidebar-footer {
+
     margin-top: auto;
 
-    padding: 10px 8px;
+    padding: 9px 8px;
 
-    border-top: 1px solid rgba(255,255,255,.06);
+    border-top:
+        1px solid rgba(255,255,255,.055);
+
 }
 
-.sidebar-link {
+
+.footer-link {
+
+    width: 100%;
+
     display: flex;
+
     align-items: center;
 
     gap: 10px;
 
-    width: 100%;
-
     padding: 9px 10px;
 
-    border-radius: 7px;
-
-    color: #aaa;
+    color: #9b9b9b;
 
     text-decoration: none;
 
-    font-size: 13px;
+    border-radius: 7px;
 
-    transition: background .12s ease, color .12s ease;
+    font-size: 12.5px;
+
 }
 
-.sidebar-link:hover {
-    background: var(--sidebar-hover);
-    color: #eee;
+
+.footer-link:hover {
+
+    color: white;
+
+    background:
+        var(--sidebar-hover);
+
 }
+
 
 /* =========================================================
    MAIN
 ========================================================= */
 
 .main {
-    flex: 1;
 
     min-width: 0;
+
+    flex: 1;
 
     height: 100%;
 
     display: flex;
+
     flex-direction: column;
 
     position: relative;
+
 }
 
+
 /* =========================================================
-   HEADER
+   TOP BAR
 ========================================================= */
 
-.header {
-    height: 56px;
+.topbar {
+
+    height: 55px;
 
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
+    gap: 10px;
 
     padding: 0 18px;
 
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom:
+        1px solid rgba(255,255,255,.055);
 
-    background: rgba(33,33,33,.94);
-
-    position: relative;
+    background:
+        rgba(33,33,33,.96);
 
     z-index: 10;
+
 }
 
+
 .menu-button {
+
     width: 34px;
     height: 34px;
-
-    border: none;
-    background: transparent;
-
-    border-radius: 7px;
-
-    color: #cfcfcf;
-
-    font-size: 19px;
-
-    cursor: pointer;
 
     display: none;
 
     align-items: center;
     justify-content: center;
+
+    background: transparent;
+
+    border: none;
+
+    border-radius: 7px;
+
+    color: #ccc;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
 }
+
 
 .menu-button:hover {
+
     background: #303030;
+
 }
 
-.header-title {
-    font-size: 15px;
+
+.topbar-title {
+
+    font-size: 14px;
+
     font-weight: 600;
 
-    color: #ededed;
 }
 
-.header-status {
-    margin-left: 10px;
 
-    color: #777;
+.topbar-model {
 
-    font-size: 12px;
+    color: #737373;
+
+    font-size: 11px;
+
 }
+
 
 /* =========================================================
-   CHAT AREA
+   CHAT SCROLL
 ========================================================= */
 
-.chat-container {
+.chat-scroll {
+
     flex: 1;
 
     min-height: 0;
@@ -362,452 +515,636 @@ body {
     overflow-y: auto;
 
     scrollbar-width: thin;
-    scrollbar-color: #555 transparent;
+
+    scrollbar-color:
+        #555 transparent;
+
 }
 
-.chat-container::-webkit-scrollbar {
+
+.chat-scroll::-webkit-scrollbar {
+
     width: 6px;
+
 }
 
-.chat-container::-webkit-scrollbar-track {
+
+.chat-scroll::-webkit-scrollbar-track {
+
     background: transparent;
+
 }
 
-.chat-container::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 10px;
+
+.chat-scroll::-webkit-scrollbar-thumb {
+
+    background: #505050;
+
+    border-radius: 20px;
+
 }
+
 
 /* =========================================================
    WELCOME
 ========================================================= */
 
 .welcome {
+
     min-height: 100%;
 
     display: flex;
+
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
-    padding: 50px 20px 140px;
+    padding:
+        40px 20px 150px;
 
     text-align: center;
+
 }
 
-.welcome-logo {
-    width: 48px;
-    height: 48px;
 
-    border-radius: 13px;
+.welcome-icon {
 
-    background: #2f6fe4;
+    width: 50px;
+    height: 50px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    color: white;
+    background: #376fc9;
+
+    border-radius: 13px;
 
     font-size: 21px;
 
-    margin-bottom: 22px;
+    color: white;
+
+    margin-bottom: 20px;
+
 }
 
-.welcome h1 {
-    margin: 0 0 8px;
 
-    font-size: 30px;
+.welcome-title {
+
+    margin: 0;
+
+    font-size: 28px;
+
     line-height: 1.2;
+
+    letter-spacing: -.7px;
 
     font-weight: 600;
 
-    letter-spacing: -.7px;
 }
 
-.welcome p {
-    margin: 0;
 
-    color: #9b9b9b;
+.welcome-description {
 
-    font-size: 14px;
+    margin:
+        10px 0 0;
+
+    color: #999;
+
+    font-size: 13px;
 
     line-height: 1.6;
+
 }
 
-.welcome-suggestions {
-    width: min(720px, 100%);
+
+.welcome-grid {
+
+    width:
+        min(720px, 100%);
 
     display: grid;
 
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+        repeat(2, 1fr);
 
     gap: 10px;
 
-    margin-top: 34px;
+    margin-top: 30px;
+
 }
 
+
 .welcome-card {
-    background: transparent;
 
-    border: 1px solid rgba(255,255,255,.09);
+    min-height: 83px;
 
-    border-radius: 10px;
-
-    padding: 14px;
-
-    color: #d0d0d0;
+    padding: 13px 14px;
 
     text-align: left;
 
+    background: transparent;
+
+    border:
+        1px solid rgba(255,255,255,.09);
+
+    border-radius: 9px;
+
+    color: #ddd;
+
     cursor: pointer;
 
-    font-family: var(--font);
-
     transition:
-        background .15s ease,
-        border-color .15s ease;
+        background .15s,
+        border-color .15s,
+        transform .15s;
+
 }
+
 
 .welcome-card:hover {
-    background: #2b2b2b;
-    border-color: rgba(255,255,255,.15);
+
+    background: #2a2a2a;
+
+    border-color:
+        rgba(255,255,255,.15);
+
+    transform:
+        translateY(-1px);
+
 }
 
-.welcome-card-icon {
+
+.card-icon {
+
     display: block;
 
-    font-size: 15px;
-
     margin-bottom: 7px;
+
+    color: #aaa;
+
+    font-size: 14px;
+
 }
 
-.welcome-card-title {
-    font-size: 13px;
+
+.card-title {
+
+    display: block;
+
+    font-size: 12.5px;
+
     font-weight: 500;
+
 }
 
-.welcome-card-sub {
-    margin-top: 3px;
 
-    color: #777;
+.card-description {
+
+    margin-top: 4px;
+
+    color: #707070;
 
     font-size: 11px;
+
 }
+
 
 /* =========================================================
    MESSAGES
 ========================================================= */
 
 .messages {
-    width: min(var(--max-chat-width), 100%);
+
+    width:
+        min(var(--chat-width), 100%);
 
     margin: 0 auto;
 
-    padding: 28px 20px 160px;
+    padding:
+        30px 20px 165px;
+
 }
 
+
 .message {
+
     display: flex;
 
     gap: 13px;
 
-    margin-bottom: 26px;
+    margin-bottom: 30px;
+
 }
 
+
 .avatar {
-    width: 30px;
-    height: 30px;
+
+    width: 29px;
+    height: 29px;
 
     flex-shrink: 0;
 
-    border-radius: 8px;
-
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    font-size: 13px;
+    border-radius: 8px;
+
+    font-size: 12px;
+
+    margin-top: 1px;
+
 }
 
-.avatar.ai {
-    background: #2f6fe4;
+
+.avatar-ai {
+
+    background: #376fc9;
+
     color: white;
+
 }
 
-.avatar.user {
-    background: #444;
+
+.avatar-user {
+
+    background: #414141;
+
     color: #ddd;
+
 }
 
-.message-content {
+
+.message-body {
+
     min-width: 0;
 
     flex: 1;
 
-    padding-top: 3px;
+}
+
+
+.message-label {
+
+    margin-bottom: 5px;
+
+    color: #999;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+.message-text {
+
+    color: #e2e2e2;
 
     font-size: 14px;
 
     line-height: 1.7;
 
-    color: #e4e4e4;
+    word-break: break-word;
+
 }
 
-.message-name {
-    font-size: 12px;
-
-    font-weight: 600;
-
-    color: #aaa;
-
-    margin-bottom: 4px;
-}
-
-.user-message .message-content {
-    color: #eee;
-}
 
 /* =========================================================
    MARKDOWN
 ========================================================= */
 
-.message-content p {
-    margin: 0 0 10px;
+.message-text p {
+
+    margin:
+        0 0 10px;
+
 }
 
-.message-content p:last-child {
+
+.message-text p:last-child {
+
     margin-bottom: 0;
+
 }
 
-.message-content strong {
+
+.message-text strong {
+
     color: #fff;
+
     font-weight: 600;
+
 }
 
-.message-content em {
-    color: #c8c8c8;
+
+.message-text a {
+
+    color: #72a3ff;
+
 }
 
-.message-content a {
-    color: #75a7ff;
+
+.message-text ul,
+.message-text ol {
+
+    margin:
+        9px 0;
+
+    padding-left: 23px;
+
 }
 
-.message-content ul,
-.message-content ol {
-    margin: 8px 0;
-    padding-left: 22px;
-}
 
-.message-content li {
+.message-text li {
+
     margin: 4px 0;
+
 }
 
-.message-content h1,
-.message-content h2,
-.message-content h3 {
-    color: #fff;
 
-    margin: 18px 0 8px;
+.message-text h1,
+.message-text h2,
+.message-text h3 {
+
+    color: white;
 
     line-height: 1.3;
+
+    margin:
+        18px 0 8px;
+
 }
 
-.message-content h1 {
+
+.message-text h1 {
+
     font-size: 21px;
+
 }
 
-.message-content h2 {
+
+.message-text h2 {
+
     font-size: 18px;
+
 }
 
-.message-content h3 {
+
+.message-text h3 {
+
     font-size: 16px;
+
 }
 
-.message-content blockquote {
-    border-left: 3px solid #555;
 
-    margin: 12px 0;
+.message-text blockquote {
 
-    padding-left: 14px;
+    margin:
+        12px 0;
+
+    padding-left: 13px;
+
+    border-left:
+        3px solid #555;
 
     color: #aaa;
+
 }
 
-.message-content code {
+
+.message-text code {
+
     font-family: var(--mono);
 
     font-size: 12px;
 
-    background: #171717;
-
-    border: 1px solid rgba(255,255,255,.08);
+    padding:
+        2px 5px;
 
     border-radius: 5px;
 
-    padding: 2px 5px;
-}
-
-.message-content pre {
     background: #171717;
 
-    border: 1px solid rgba(255,255,255,.08);
+    border:
+        1px solid rgba(255,255,255,.08);
 
-    border-radius: 9px;
+}
 
-    overflow-x: auto;
+
+.message-text pre {
+
+    margin:
+        13px 0;
 
     padding: 14px;
 
-    margin: 12px 0;
+    overflow-x: auto;
+
+    border-radius: 9px;
+
+    background: #171717;
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
 }
 
-.message-content pre code {
+
+.message-text pre code {
+
+    padding: 0;
+
     background: transparent;
 
     border: none;
 
-    padding: 0;
-
     color: #ddd;
 
-    font-size: 12px;
-
     line-height: 1.6;
+
 }
+
 
 /* =========================================================
    THINKING
 ========================================================= */
 
 .thinking {
-    display: flex;
 
-    align-items: flex-start;
+    display: flex;
 
     gap: 13px;
 
-    margin-bottom: 26px;
+    margin-bottom: 28px;
+
 }
 
-.thinking .avatar {
-    background: #2f6fe4;
-    color: white;
-}
 
-.thinking-content {
-    padding-top: 5px;
-
-    color: #888;
-
-    font-size: 13px;
+.thinking-text {
 
     display: flex;
+
     align-items: center;
 
-    gap: 5px;
+    gap: 4px;
+
+    padding-top: 6px;
+
+    color: #777;
+
+    font-size: 12px;
+
 }
 
-.dot {
+
+.thinking-dot {
+
     width: 4px;
     height: 4px;
 
+    background: #888;
+
     border-radius: 50%;
 
-    background: #999;
+    animation:
+        thinking 1.25s infinite;
 
-    animation: blink 1.3s infinite;
 }
 
-.dot:nth-child(2) {
+
+.thinking-dot:nth-child(2) {
+
     animation-delay: .15s;
+
 }
 
-.dot:nth-child(3) {
+
+.thinking-dot:nth-child(3) {
+
     animation-delay: .3s;
+
 }
 
-@keyframes blink {
-    0%, 60%, 100% {
+
+@keyframes thinking {
+
+    0%, 65%, 100% {
+
         opacity: .25;
+
+        transform:
+            translateY(0);
+
     }
 
     30% {
+
         opacity: 1;
+
+        transform:
+            translateY(-2px);
+
     }
+
 }
+
 
 /* =========================================================
    COMPOSER
 ========================================================= */
 
 .composer-area {
+
     position: absolute;
 
     left: 0;
     right: 0;
     bottom: 0;
 
-    padding: 18px 20px 22px;
+    padding:
+        17px 20px 21px;
 
     background:
         linear-gradient(
             to bottom,
-            transparent,
-            rgba(33,33,33,.95) 35%,
-            #212121 65%
+            transparent 0%,
+            rgba(33,33,33,.88) 30%,
+            #212121 58%
         );
 
     pointer-events: none;
+
 }
 
+
 .composer {
-    width: min(820px, 100%);
+
+    width:
+        min(820px, 100%);
 
     margin: 0 auto;
 
-    pointer-events: auto;
-
     display: flex;
+
     align-items: flex-end;
 
-    gap: 8px;
+    gap: 6px;
 
-    padding: 9px;
+    padding: 8px;
 
-    background: #2f2f2f;
+    background: var(--input);
 
-    border: 1px solid rgba(255,255,255,.10);
+    border:
+        1px solid rgba(255,255,255,.10);
 
     border-radius: 14px;
 
-    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    box-shadow:
+        0 5px 25px rgba(0,0,0,.18);
+
+    pointer-events: auto;
 
     transition:
-        border-color .15s ease,
-        box-shadow .15s ease;
+        border-color .15s,
+        box-shadow .15s;
+
 }
+
 
 .composer:focus-within {
-    border-color: rgba(255,255,255,.18);
+
+    border-color:
+        rgba(255,255,255,.17);
 
     box-shadow:
-        0 4px 24px rgba(0,0,0,.22);
+        0 6px 30px rgba(0,0,0,.24);
+
 }
 
+
 #msg {
+
     flex: 1;
 
     min-width: 0;
 
-    min-height: 38px;
+    min-height: 39px;
+
     max-height: 180px;
 
     resize: none;
 
+    padding:
+        9px 7px;
+
     border: none;
+
     outline: none;
 
     background: transparent;
@@ -820,20 +1157,27 @@ body {
 
     line-height: 1.5;
 
-    padding: 9px 7px;
-
-    overflow-y: auto;
 }
+
 
 #msg::placeholder {
-    color: #858585;
+
+    color: #808080;
+
 }
 
-.composer-button {
+
+.action-button {
+
     width: 38px;
     height: 38px;
 
     flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
 
     border: none;
 
@@ -843,75 +1187,97 @@ body {
 
     color: #aaa;
 
-    font-size: 16px;
+    font-size: 18px;
 
     cursor: pointer;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     transition:
-        background .12s ease,
-        color .12s ease;
+        background .12s,
+        color .12s;
+
 }
 
-.composer-button:hover {
-    background: #404040;
-    color: #eee;
+
+.action-button:hover {
+
+    background: #414141;
+
+    color: white;
+
 }
+
 
 .send-button {
-    background: #fff;
+
+    background: white;
 
     color: #222;
 
-    font-size: 15px;
+    font-size: 17px;
 
     font-weight: 700;
+
 }
+
 
 .send-button:hover {
-    background: #e5e5e5;
+
+    background: #e8e8e8;
 
     color: #111;
+
 }
 
+
 .send-button:disabled {
+
     background: #555;
 
     color: #888;
 
     cursor: not-allowed;
+
 }
 
-.composer-hint {
-    width: min(820px, 100%);
 
-    margin: 8px auto 0;
+.composer-hint {
+
+    width:
+        min(820px, 100%);
+
+    margin:
+        7px auto 0;
 
     text-align: center;
 
+    color: #666;
+
     font-size: 10px;
 
-    color: #666;
+    pointer-events: auto;
+
 }
 
+
 /* =========================================================
-   OVERLAY
+   MOBILE OVERLAY
 ========================================================= */
 
 .overlay {
+
     display: none;
 
     position: fixed;
 
     inset: 0;
 
-    background: rgba(0,0,0,.55);
-
     z-index: 90;
+
+    background:
+        rgba(0,0,0,.55);
+
 }
+
 
 /* =========================================================
    MOBILE
@@ -920,164 +1286,228 @@ body {
 @media(max-width: 760px) {
 
     .sidebar {
+
         position: fixed;
 
         left: 0;
         top: 0;
         bottom: 0;
 
-        transform: translateX(-100%);
+        transform:
+            translateX(-100%);
 
-        box-shadow: 10px 0 35px rgba(0,0,0,.4);
+        box-shadow:
+            12px 0 35px rgba(0,0,0,.4);
+
     }
+
 
     .sidebar.open {
-        transform: translateX(0);
+
+        transform:
+            translateX(0);
+
     }
 
-    .sidebar.open + .overlay {
-        display: block;
-    }
 
     .menu-button {
+
         display: flex;
+
     }
 
-    .header {
-        padding: 0 12px;
 
-        gap: 9px;
+    .topbar {
+
+        padding:
+            0 12px;
+
     }
 
-    .header-title {
-        font-size: 14px;
-    }
 
-    .header-status {
+    .topbar-model {
+
         display: none;
+
     }
+
 
     .welcome {
+
         padding:
-            35px 16px
-            150px;
+            35px 15px 150px;
+
     }
 
-    .welcome h1 {
-        font-size: 26px;
+
+    .welcome-title {
+
+        font-size: 25px;
+
     }
 
-    .welcome-suggestions {
-        grid-template-columns: 1fr;
+
+    .welcome-grid {
+
+        grid-template-columns:
+            1fr;
+
     }
+
 
     .messages {
+
         padding:
-            24px 14px
-            160px;
+            24px 13px 165px;
+
     }
+
 
     .message {
+
         gap: 10px;
-        margin-bottom: 24px;
+
+        margin-bottom: 25px;
+
     }
 
+
     .avatar {
+
         width: 28px;
         height: 28px;
 
-        border-radius: 7px;
-
-        font-size: 12px;
     }
 
-    .message-content {
+
+    .message-text {
+
         font-size: 14px;
+
     }
+
 
     .composer-area {
+
         padding:
-            12px
-            12px
-            17px;
+            12px 11px 17px;
+
     }
+
 
     .composer {
+
         border-radius: 13px;
+
     }
 
-    .composer-hint {
-        font-size: 9px;
-    }
 }
 
-@media(max-width: 420px) {
 
-    .welcome-logo {
-        width: 44px;
-        height: 44px;
+/* =========================================================
+   VERY SMALL SCREENS
+========================================================= */
+
+@media(max-width: 380px) {
+
+    .welcome-title {
+
+        font-size: 23px;
+
     }
 
-    .welcome h1 {
-        font-size: 24px;
+
+    .welcome-description {
+
+        font-size: 12px;
+
     }
 
-    .welcome p {
-        font-size: 13px;
+
+    .messages {
+
+        padding-left: 10px;
+        padding-right: 10px;
+
     }
 
-    .welcome-card {
-        padding: 12px;
+
+    .message-text {
+
+        font-size: 13.5px;
+
     }
 
-    .message-name {
-        font-size: 11px;
-    }
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="app">
+
 
     <!-- =====================================================
          SIDEBAR
     ====================================================== -->
 
-    <aside class="sidebar" id="sidebar">
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
 
-        <div class="sidebar-top">
+        <div class="sidebar-header">
 
             <div class="brand">
-                <div class="brand-logo">✦</div>
-                <div class="brand-name">D-AI</div>
+
+                <div class="brand-icon">
+                    ✦
+                </div>
+
+                <span class="brand-text">
+                    D-AI
+                </span>
+
             </div>
+
 
             <button
                 class="new-chat"
                 onclick="newChat()"
             >
-                <span class="new-chat-icon">＋</span>
-                <span>New chat</span>
+
+                <span class="new-chat-plus">
+                    ＋
+                </span>
+
+                <span>
+                    New chat
+                </span>
+
             </button>
 
         </div>
 
 
-        <div class="sidebar-label">
-            Try asking
+        <div class="sidebar-title">
+            Suggestions
         </div>
 
 
-        <div class="suggestions" id="sidebarSuggestions"></div>
+        <div
+            class="sidebar-suggestions"
+            id="sidebarSuggestions"
+        ></div>
 
 
-        <div class="sidebar-bottom">
+        <div class="sidebar-footer">
 
             <a
-                class="sidebar-link"
+                class="footer-link"
                 href="https://d-ai.rf.gd/faq.html"
                 target="_blank"
                 rel="noopener"
@@ -1086,8 +1516,9 @@ body {
                 <span>FAQ & Help</span>
             </a>
 
+
             <a
-                class="sidebar-link"
+                class="footer-link"
                 href="https://discord.gg/JEYN5UV66x"
                 target="_blank"
                 rel="noopener"
@@ -1114,21 +1545,24 @@ body {
 
     <main class="main">
 
-        <header class="header">
+
+        <header class="topbar">
 
             <button
                 class="menu-button"
                 onclick="toggleSidebar()"
-                aria-label="Open menu"
+                aria-label="Open sidebar"
             >
                 ☰
             </button>
 
-            <span class="header-title">
+
+            <span class="topbar-title">
                 D-AI
             </span>
 
-            <span class="header-status">
+
+            <span class="topbar-model">
                 AI assistant
             </span>
 
@@ -1140,9 +1574,10 @@ body {
         ================================================== -->
 
         <div
-            class="chat-container"
-            id="chatContainer"
+            class="chat-scroll"
+            id="chatScroll"
         >
+
 
             <!-- WELCOME -->
 
@@ -1151,23 +1586,25 @@ body {
                 id="welcome"
             >
 
-                <div class="welcome-logo">
+                <div class="welcome-icon">
                     ✦
                 </div>
 
-                <h1>
+
+                <h1 class="welcome-title">
                     How can I help?
                 </h1>
 
-                <p>
-                    Ask D-AI a question, give it a task,<br>
+
+                <p class="welcome-description">
+                    Ask a question, work through a problem,<br>
                     or just start a conversation.
                 </p>
 
 
                 <div
-                    class="welcome-suggestions"
-                    id="welcomeSuggestions"
+                    class="welcome-grid"
+                    id="welcomeGrid"
                 ></div>
 
             </section>
@@ -1178,8 +1615,9 @@ body {
             <div
                 class="messages"
                 id="messages"
-                style="display:none;"
+                style="display:none"
             ></div>
+
 
         </div>
 
@@ -1190,7 +1628,9 @@ body {
 
         <div class="composer-area">
 
+
             <div class="composer">
+
 
                 <textarea
                     id="msg"
@@ -1202,25 +1642,15 @@ body {
 
 
                 <button
-                    class="composer-button"
-                    id="voiceButton"
-                    onclick="listen()"
-                    title="Voice input"
-                    aria-label="Voice input"
-                >
-                    🎤
-                </button>
-
-
-                <button
-                    class="composer-button send-button"
+                    class="action-button send-button"
                     id="sendBtn"
                     onclick="send()"
-                    title="Send message"
                     aria-label="Send message"
+                    title="Send"
                 >
                     ↑
                 </button>
+
 
             </div>
 
@@ -1229,9 +1659,12 @@ body {
                 D-AI can make mistakes. Check important information.
             </div>
 
+
         </div>
 
+
     </main>
+
 
 </div>
 
@@ -1262,17 +1695,14 @@ const input =
 const sendBtn =
     document.getElementById("sendBtn");
 
-const voiceButton =
-    document.getElementById("voiceButton");
-
 const welcome =
     document.getElementById("welcome");
 
 const messages =
     document.getElementById("messages");
 
-const chatContainer =
-    document.getElementById("chatContainer");
+const chatScroll =
+    document.getElementById("chatScroll");
 
 const sidebar =
     document.getElementById("sidebar");
@@ -1282,7 +1712,8 @@ const overlay =
 
 
 let chatStarted = false;
-let isSending = false;
+
+let sending = false;
 
 
 /* =========================================================
@@ -1294,53 +1725,54 @@ const SUGGESTIONS = [
     {
         icon: "⌘",
         title: "Help me write some code",
-        subtitle: "Build, debug or explain code"
+        description: "Build or debug something"
     },
 
     {
         icon: "?",
         title: "Explain something simply",
-        subtitle: "Break down a difficult topic"
+        description: "Break down a difficult topic"
     },
 
     {
         icon: "✎",
         title: "Help me write",
-        subtitle: "Essays, messages and ideas"
+        description: "Essays, messages and ideas"
     },
 
     {
         icon: "◇",
         title: "Give me some ideas",
-        subtitle: "Projects, startups and creativity"
+        description: "Projects, startups and more"
     },
 
     {
         icon: "∑",
-        title: "Help with a problem",
-        subtitle: "Work through it step by step"
+        title: "Help me solve a problem",
+        description: "Work through it together"
     },
 
     {
         icon: "◎",
         title: "Teach me something",
-        subtitle: "Learn a new skill or concept"
+        description: "Learn a new skill"
     }
 
 ];
 
 
-function randomSuggestions() {
+function shuffledSuggestions() {
 
     return [...SUGGESTIONS]
-        .sort(() => Math.random() - .5)
-        .slice(0, 4);
+        .sort(
+            () => Math.random() - 0.5
+        );
 
 }
 
 
 /* =========================================================
-   BUILD SIDEBAR
+   SIDEBAR
 ========================================================= */
 
 function buildSidebar() {
@@ -1352,24 +1784,30 @@ function buildSidebar() {
 
     container.innerHTML = "";
 
-    randomSuggestions()
+
+    shuffledSuggestions()
+        .slice(0, 5)
         .forEach(item => {
 
             const button =
                 document.createElement("button");
 
             button.className =
-                "suggestion";
+                "sidebar-item";
+
 
             button.innerHTML = `
-                <span class="suggestion-icon">
+
+                <span class="sidebar-item-icon">
                     ${item.icon}
                 </span>
 
                 <span>
                     ${item.title}
                 </span>
+
             `;
+
 
             button.onclick = () => {
 
@@ -1384,6 +1822,7 @@ function buildSidebar() {
 
             };
 
+
             container.appendChild(button);
 
         });
@@ -1392,19 +1831,21 @@ function buildSidebar() {
 
 
 /* =========================================================
-   BUILD WELCOME
+   WELCOME
 ========================================================= */
 
 function buildWelcome() {
 
     const container =
         document.getElementById(
-            "welcomeSuggestions"
+            "welcomeGrid"
         );
 
     container.innerHTML = "";
 
-    randomSuggestions()
+
+    shuffledSuggestions()
+        .slice(0, 4)
         .forEach(item => {
 
             const button =
@@ -1413,21 +1854,23 @@ function buildWelcome() {
             button.className =
                 "welcome-card";
 
+
             button.innerHTML = `
 
-                <span class="welcome-card-icon">
+                <span class="card-icon">
                     ${item.icon}
                 </span>
 
-                <span class="welcome-card-title">
+                <span class="card-title">
                     ${item.title}
                 </span>
 
-                <div class="welcome-card-sub">
-                    ${item.subtitle}
+                <div class="card-description">
+                    ${item.description}
                 </div>
 
             `;
+
 
             button.onclick = () => {
 
@@ -1440,6 +1883,7 @@ function buildWelcome() {
 
             };
 
+
             container.appendChild(button);
 
         });
@@ -1448,28 +1892,22 @@ function buildWelcome() {
 
 
 buildSidebar();
+
 buildWelcome();
 
 
 /* =========================================================
-   SIDEBAR
+   SIDEBAR CONTROLS
 ========================================================= */
 
 function toggleSidebar() {
 
     sidebar.classList.toggle("open");
 
-    if (
+    overlay.style.display =
         sidebar.classList.contains("open")
-    ) {
-
-        overlay.style.display = "block";
-
-    } else {
-
-        overlay.style.display = "none";
-
-    }
+            ? "block"
+            : "none";
 
 }
 
@@ -1478,7 +1916,8 @@ function closeSidebar() {
 
     sidebar.classList.remove("open");
 
-    overlay.style.display = "none";
+    overlay.style.display =
+        "none";
 
 }
 
@@ -1495,15 +1934,17 @@ function showChat() {
 
     chatStarted = true;
 
-    welcome.style.display = "none";
+    welcome.style.display =
+        "none";
 
-    messages.style.display = "block";
+    messages.style.display =
+        "block";
 
 }
 
 
 /* =========================================================
-   ESCAPE USER TEXT
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHTML(text) {
@@ -1526,17 +1967,16 @@ function addMessage(text, role) {
 
     showChat();
 
-    const isAI =
+
+    const ai =
         role === "ai";
 
-    const wrapper =
+
+    const message =
         document.createElement("div");
 
-    wrapper.className =
-        "message " +
-        (isAI
-            ? "ai-message"
-            : "user-message");
+    message.className =
+        "message";
 
 
     const avatar =
@@ -1544,35 +1984,42 @@ function addMessage(text, role) {
 
     avatar.className =
         "avatar " +
-        (isAI ? "ai" : "user");
+        (ai
+            ? "avatar-ai"
+            : "avatar-user");
+
 
     avatar.textContent =
-        isAI ? "✦" : "U";
-
-
-    const content =
-        document.createElement("div");
-
-    content.className =
-        "message-content";
-
-
-    const name =
-        document.createElement("div");
-
-    name.className =
-        "message-name";
-
-    name.textContent =
-        isAI ? "D-AI" : "You";
+        ai ? "✦" : "U";
 
 
     const body =
         document.createElement("div");
 
-    if (isAI) {
+    body.className =
+        "message-body";
 
-        body.innerHTML =
+
+    const label =
+        document.createElement("div");
+
+    label.className =
+        "message-label";
+
+    label.textContent =
+        ai ? "D-AI" : "You";
+
+
+    const textElement =
+        document.createElement("div");
+
+    textElement.className =
+        "message-text";
+
+
+    if (ai) {
+
+        textElement.innerHTML =
             marked.parse(
                 text,
                 {
@@ -1582,24 +2029,28 @@ function addMessage(text, role) {
 
     } else {
 
-        body.innerHTML =
+        textElement.innerHTML =
             escapeHTML(text)
-                .replace(/\n/g, "<br>");
+                .replace(
+                    /\n/g,
+                    "<br>"
+                );
 
     }
 
 
-    content.appendChild(name);
+    body.appendChild(label);
 
-    content.appendChild(body);
+    body.appendChild(textElement);
 
-    wrapper.appendChild(avatar);
+    message.appendChild(avatar);
 
-    wrapper.appendChild(content);
+    message.appendChild(body);
 
-    messages.appendChild(wrapper);
+    messages.appendChild(message);
 
-    scrollToBottom();
+
+    scrollBottom();
 
 }
 
@@ -1610,51 +2061,59 @@ function addMessage(text, role) {
 
 function showThinking() {
 
-    const wrapper =
+    const element =
         document.createElement("div");
 
-    wrapper.className =
+    element.className =
         "thinking";
 
-    wrapper.id =
+    element.id =
         "thinking";
 
 
-    wrapper.innerHTML = `
+    element.innerHTML = `
 
-        <div class="avatar ai">
+        <div class="avatar avatar-ai">
             ✦
         </div>
 
-        <div class="thinking-content">
+        <div class="thinking-text">
 
             <span>Thinking</span>
 
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
+            <span
+                class="thinking-dot"
+            ></span>
+
+            <span
+                class="thinking-dot"
+            ></span>
+
+            <span
+                class="thinking-dot"
+            ></span>
 
         </div>
 
     `;
 
 
-    messages.appendChild(wrapper);
+    messages.appendChild(element);
 
-    scrollToBottom();
+    scrollBottom();
 
 }
 
 
 function removeThinking() {
 
-    const thinking =
+    const element =
         document.getElementById(
             "thinking"
         );
 
-    if (thinking) {
-        thinking.remove();
+    if (element) {
+        element.remove();
     }
 
 }
@@ -1664,12 +2123,12 @@ function removeThinking() {
    SCROLL
 ========================================================= */
 
-function scrollToBottom() {
+function scrollBottom() {
 
     requestAnimationFrame(() => {
 
-        chatContainer.scrollTop =
-            chatContainer.scrollHeight;
+        chatScroll.scrollTop =
+            chatScroll.scrollHeight;
 
     });
 
@@ -1682,34 +2141,41 @@ function scrollToBottom() {
 
 async function send() {
 
-    if (isSending) {
+    if (sending) {
         return;
     }
 
+
     const text =
         input.value.trim();
+
 
     if (!text) {
         return;
     }
 
 
-    isSending = true;
+    sending = true;
+
 
     input.value = "";
 
     autoResize();
 
+
     input.disabled = true;
 
     sendBtn.disabled = true;
 
+
     showChat();
+
 
     addMessage(
         text,
         "user"
     );
+
 
     showThinking();
 
@@ -1729,47 +2195,40 @@ async function send() {
 
                     body: JSON.stringify({
                         message: text,
-                        sessionId: sessionId
+                        sessionId
                     })
                 }
             );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Server returned " +
-                response.status
-            );
-
-        }
 
 
         const data =
             await response.json();
 
 
+        if (!response.ok) {
+
+            throw new Error(
+                data.reply ||
+                "Request failed"
+            );
+
+        }
+
+
         removeThinking();
 
 
-        const reply =
-            data.reply ||
-            "I couldn't generate a response. Please try again.";
-
-
         addMessage(
-            reply,
+            data.reply ||
+            "I didn't receive a response.",
             "ai"
         );
-
-
-        speak(reply);
 
 
     } catch (error) {
 
         console.error(
-            "Chat error:",
+            "D-AI error:",
             error
         );
 
@@ -1778,13 +2237,15 @@ async function send() {
 
 
         addMessage(
-            "Something went wrong while contacting D-AI. Please try again.",
+            error.message ||
+            "Something went wrong. Please try again.",
             "ai"
         );
 
+
     } finally {
 
-        isSending = false;
+        sending = false;
 
         input.disabled = false;
 
@@ -1805,11 +2266,14 @@ async function newChat() {
 
     messages.innerHTML = "";
 
-    messages.style.display = "none";
+    messages.style.display =
+        "none";
 
-    welcome.style.display = "flex";
+    welcome.style.display =
+        "flex";
 
     chatStarted = false;
+
 
     buildSidebar();
 
@@ -1817,15 +2281,6 @@ async function newChat() {
 
     closeSidebar();
 
-
-    /*
-       Reset is optional.
-
-       If your backend has /reset,
-       this will clear the server-side session.
-
-       If it doesn't, nothing breaks.
-    */
 
     try {
 
@@ -1847,15 +2302,48 @@ async function newChat() {
 
     } catch {
 
-        // Reset endpoint is optional.
+        // The UI still resets
+        // if the server reset fails.
 
     }
+
+
+    input.value = "";
+
+    autoResize();
+
+    input.focus();
 
 }
 
 
 /* =========================================================
-   ENTER TO SEND
+   TEXTAREA
+========================================================= */
+
+function autoResize() {
+
+    input.style.height =
+        "auto";
+
+
+    input.style.height =
+        Math.min(
+            input.scrollHeight,
+            180
+        ) + "px";
+
+}
+
+
+input.addEventListener(
+    "input",
+    autoResize
+);
+
+
+/* =========================================================
+   ENTER
 ========================================================= */
 
 input.addEventListener(
@@ -1878,199 +2366,25 @@ input.addEventListener(
 
 
 /* =========================================================
-   AUTO RESIZE TEXTAREA
+   ESC CLOSES SIDEBAR
 ========================================================= */
 
-function autoResize() {
+document.addEventListener(
+    "keydown",
+    event => {
 
-    input.style.height =
-        "auto";
+        if (event.key === "Escape") {
 
-    input.style.height =
-        Math.min(
-            input.scrollHeight,
-            180
-        ) + "px";
+            closeSidebar();
 
-}
+        }
 
-
-input.addEventListener(
-    "input",
-    autoResize
+    }
 );
 
 
 /* =========================================================
-   VOICE INPUT
-========================================================= */
-
-let recognition = null;
-
-
-function listen() {
-
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-
-    if (!SpeechRecognition) {
-
-        alert(
-            "Voice input isn't supported by this browser."
-        );
-
-        return;
-
-    }
-
-
-    if (recognition) {
-
-        try {
-            recognition.stop();
-        } catch {}
-
-        recognition = null;
-
-        voiceButton.textContent =
-            "🎤";
-
-        return;
-
-    }
-
-
-    recognition =
-        new SpeechRecognition();
-
-
-    recognition.lang =
-        "en-US";
-
-    recognition.continuous =
-        false;
-
-    recognition.interimResults =
-        false;
-
-
-    recognition.onstart = () => {
-
-        voiceButton.textContent =
-            "⏹";
-
-        voiceButton.style.color =
-            "#ff7777";
-
-    };
-
-
-    recognition.onresult =
-        event => {
-
-            const text =
-                event
-                    .results[0][0]
-                    .transcript;
-
-
-            input.value =
-                text;
-
-            autoResize();
-
-            input.focus();
-
-        };
-
-
-    recognition.onerror =
-        error => {
-
-            console.error(
-                "Speech recognition:",
-                error
-            );
-
-        };
-
-
-    recognition.onend = () => {
-
-        voiceButton.textContent =
-            "🎤";
-
-        voiceButton.style.color =
-            "";
-
-        recognition =
-            null;
-
-    };
-
-
-    recognition.start();
-
-}
-
-
-/* =========================================================
-   TEXT TO SPEECH
-========================================================= */
-
-function speak(text) {
-
-    if (
-        !("speechSynthesis" in window)
-    ) {
-        return;
-    }
-
-
-    /*
-       Strip markdown before speaking.
-    */
-
-    const clean =
-        text
-            .replace(/```[\s\S]*?```/g, "")
-            .replace(/[*_#>`]/g, "")
-            .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-            .trim();
-
-
-    if (!clean) {
-        return;
-    }
-
-
-    window.speechSynthesis.cancel();
-
-
-    const utterance =
-        new SpeechSynthesisUtterance(
-            clean
-        );
-
-
-    utterance.rate =
-        1.02;
-
-    utterance.pitch =
-        1;
-
-
-    window.speechSynthesis.speak(
-        utterance
-    );
-
-}
-
-
-/* =========================================================
-   INITIAL FOCUS
+   START
 ========================================================= */
 
 input.focus();
@@ -2078,4 +2392,5 @@ input.focus();
 </script>
 
 </body>
+
 </html>
