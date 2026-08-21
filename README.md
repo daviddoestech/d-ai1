@@ -1,6 +1,6 @@
  🤖 D-AI (David-AI)
 
-D-AI is a fast, modern AI chat assistant powered by Groq and LLaMA 3.1.  
+D-AI is a fast, modern AI chat assistant powered by Groq and GPT-OSS-120B
 It is designed to deliver quick, natural, and helpful conversations through a clean web interface.
 
 Built by **David Does Tech**.
