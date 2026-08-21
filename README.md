@@ -5,7 +5,8 @@ It is designed to deliver quick, natural, and helpful conversations through a cl
 
 Built by **David Does Tech**.
 
-🌐 Live Website: https://d-ai.rf.gd  
+🌐 Live Website: https://d-ai.ct.ws
+🧐 More about D-AI: https://d-ai.xo.je
 👨‍💻 Developer: https://daviddoestech.rf.gd  
 
 
