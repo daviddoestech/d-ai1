@@ -11,7 +11,6 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 3000;
-
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // ============================================================
@@ -24,15 +23,19 @@ const MAX_MESSAGES = 30;
 const MAX_MESSAGE_LENGTH = 12000;
 
 // ============================================================
-// BASIC STARTUP CHECK
+// STARTUP
 // ============================================================
 
 console.log("=================================");
 console.log("D-AI SERVER");
 console.log("=================================");
-console.log("Groq API Key:", GROQ_API_KEY ? "FOUND" : "MISSING");
+console.log(
+    "Groq API Key:",
+    GROQ_API_KEY ? "FOUND" : "MISSING"
+);
 console.log("Model:", MODEL);
 console.log("Port:", PORT);
+console.log("Streaming: ENABLED");
 console.log("=================================");
 
 if (!GROQ_API_KEY) {
@@ -149,6 +152,7 @@ Give the user something useful instead of padding the response.
 // ============================================================
 
 const sessions = Object.create(null);
+const sessionCreatedAt = new Map();
 
 // ============================================================
 // HOME
@@ -161,97 +165,129 @@ app.get("/", (req, res) => {
 });
 
 // ============================================================
-// CHAT
+// STREAMING CHAT
 // ============================================================
 
 app.post("/chat", async (req, res) => {
 
+    const { message, sessionId } = req.body;
+
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
+
+    if (
+        typeof message !== "string" ||
+        !message.trim()
+    ) {
+        return res.status(400).json({
+            reply: "Give me a message and I'll take it from there."
+        });
+    }
+
+    if (
+        typeof sessionId !== "string" ||
+        !sessionId.trim()
+    ) {
+        return res.status(400).json({
+            reply: "Your chat session is missing. Refresh the page and try again."
+        });
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+        return res.status(413).json({
+            reply: "That message is too large. Try sending a shorter version."
+        });
+    }
+
+    if (!GROQ_API_KEY) {
+        return res.status(500).json({
+            reply: "D-AI isn't configured correctly on the server. The Groq API key is missing."
+        });
+    }
+
+    // --------------------------------------------------------
+    // CREATE SESSION
+    // --------------------------------------------------------
+
+    if (!sessions[sessionId]) {
+
+        sessions[sessionId] = [
+            {
+                role: "system",
+                content: systemPrompt
+            }
+        ];
+
+        sessionCreatedAt.set(
+            sessionId,
+            Date.now()
+        );
+    }
+
+    const history = sessions[sessionId];
+
+    // --------------------------------------------------------
+    // ADD USER MESSAGE
+    // --------------------------------------------------------
+
+    history.push({
+        role: "user",
+        content: message.trim()
+    });
+
+    // --------------------------------------------------------
+    // LIMIT MEMORY
+    // --------------------------------------------------------
+
+    if (history.length > MAX_MESSAGES + 1) {
+
+        const systemMessage = history[0];
+
+        const recentMessages =
+            history.slice(-MAX_MESSAGES);
+
+        sessions[sessionId] = [
+            systemMessage,
+            ...recentMessages
+        ];
+    }
+
+    // --------------------------------------------------------
+    // SSE HEADERS
+    // --------------------------------------------------------
+
+    res.setHeader(
+        "Content-Type",
+        "text/event-stream; charset=utf-8"
+    );
+
+    res.setHeader(
+        "Cache-Control",
+        "no-cache, no-transform"
+    );
+
+    res.setHeader(
+        "Connection",
+        "keep-alive"
+    );
+
+    // Useful when running behind some proxies
+    res.setHeader(
+        "X-Accel-Buffering",
+        "no"
+    );
+
+    if (res.flushHeaders) {
+        res.flushHeaders();
+    }
+
+    let fullReply = "";
+
     try {
 
-        const { message, sessionId } = req.body;
-
         // ----------------------------------------------------
-        // VALIDATION
-        // ----------------------------------------------------
-
-        if (
-            typeof message !== "string" ||
-            !message.trim()
-        ) {
-            return res.status(400).json({
-                reply: "Give me a message and I'll take it from there."
-            });
-        }
-
-        if (
-            typeof sessionId !== "string" ||
-            !sessionId.trim()
-        ) {
-            return res.status(400).json({
-                reply: "Your chat session is missing. Refresh the page and try again."
-            });
-        }
-
-        if (message.length > MAX_MESSAGE_LENGTH) {
-            return res.status(413).json({
-                reply: "That message is too large. Try sending a shorter version."
-            });
-        }
-
-        if (!GROQ_API_KEY) {
-            console.error("GROQ_API_KEY is missing.");
-
-            return res.status(500).json({
-                reply: "D-AI isn't configured correctly on the server. The Groq API key is missing."
-            });
-        }
-
-        // ----------------------------------------------------
-        // CREATE SESSION
-        // ----------------------------------------------------
-
-        if (!sessions[sessionId]) {
-
-            sessions[sessionId] = [
-                {
-                    role: "system",
-                    content: systemPrompt
-                }
-            ];
-
-        }
-
-        const history = sessions[sessionId];
-
-        // ----------------------------------------------------
-        // ADD USER MESSAGE
-        // ----------------------------------------------------
-
-        history.push({
-            role: "user",
-            content: message.trim()
-        });
-
-        // ----------------------------------------------------
-        // LIMIT MEMORY
-        // ----------------------------------------------------
-
-        if (history.length > MAX_MESSAGES + 1) {
-
-            const systemMessage = history[0];
-
-            const recentMessages =
-                history.slice(-(MAX_MESSAGES));
-
-            sessions[sessionId] = [
-                systemMessage,
-                ...recentMessages
-            ];
-
-        }
-
-        // ----------------------------------------------------
-        // GROQ REQUEST
+        // GROQ STREAM REQUEST
         // ----------------------------------------------------
 
         const response = await axios.post(
@@ -268,7 +304,9 @@ app.post("/chat", async (req, res) => {
 
                 top_p: 0.9,
 
-                reasoning_effort: "medium"
+                reasoning_effort: "medium",
+
+                stream: true
             },
 
             {
@@ -277,55 +315,169 @@ app.post("/chat", async (req, res) => {
                         `Bearer ${GROQ_API_KEY}`,
 
                     "Content-Type":
-                        "application/json"
+                        "application/json",
+
+                    Accept:
+                        "text/event-stream"
                 },
+
+                responseType: "stream",
 
                 timeout: 60000
             }
         );
 
         // ----------------------------------------------------
-        // GET RESPONSE
+        // RECEIVE STREAM
         // ----------------------------------------------------
 
-        const botReply =
-            response.data
-                ?.choices
-                ?. [0]
-                ?.message
-                ?.content
-                ?.trim();
+        response.data.on(
+            "data",
+            (chunk) => {
 
+                const text =
+                    chunk.toString();
 
-        if (!botReply) {
+                const lines =
+                    text.split("\n");
 
-            console.error(
-                "Groq returned no usable response:",
-                response.data
-            );
+                for (const line of lines) {
 
-            return res.status(502).json({
-                reply: "I didn't get a usable response from the model. Try sending that again."
-            });
+                    const trimmed =
+                        line.trim();
 
-        }
+                    if (!trimmed) {
+                        continue;
+                    }
+
+                    if (!trimmed.startsWith("data:")) {
+                        continue;
+                    }
+
+                    const data =
+                        trimmed.slice(5).trim();
+
+                    if (data === "[DONE]") {
+
+                        // Save complete response
+                        if (fullReply) {
+
+                            sessions[sessionId].push({
+                                role: "assistant",
+                                content: fullReply
+                            });
+
+                        }
+
+                        res.write(
+                            `data: ${JSON.stringify({
+                                done: true
+                            })}\n\n`
+                        );
+
+                        res.end();
+
+                        return;
+                    }
+
+                    try {
+
+                        const parsed =
+                            JSON.parse(data);
+
+                        const delta =
+                            parsed
+                                ?.choices
+                                ?. [0]
+                                ?.delta
+                                ?.content;
+
+                        if (
+                            typeof delta === "string" &&
+                            delta.length > 0
+                        ) {
+
+                            fullReply += delta;
+
+                            res.write(
+                                `data: ${JSON.stringify({
+                                    content: delta
+                                })}\n\n`
+                            );
+
+                        }
+
+                    } catch (parseError) {
+
+                        // A chunk can contain incomplete SSE data.
+                        // Ignore it instead of crashing the request.
+
+                    }
+
+                }
+
+            }
+        );
 
         // ----------------------------------------------------
-        // SAVE RESPONSE
+        // STREAM ERROR
         // ----------------------------------------------------
 
-        sessions[sessionId].push({
-            role: "assistant",
-            content: botReply
-        });
+        response.data.on(
+            "error",
+            (error) => {
+
+                console.error(
+                    "Groq stream error:",
+                    error.message
+                );
+
+                if (!res.writableEnded) {
+
+                    res.write(
+                        `data: ${JSON.stringify({
+                            error:
+                                "The connection to Groq was interrupted."
+                        })}\n\n`
+                    );
+
+                    res.end();
+                }
+
+            }
+        );
 
         // ----------------------------------------------------
-        // RESPONSE
+        // STREAM END
         // ----------------------------------------------------
 
-        return res.json({
-            reply: botReply
-        });
+        response.data.on(
+            "end",
+            () => {
+
+                if (!res.writableEnded) {
+
+                    // In case Groq closes without [DONE]
+                    if (fullReply) {
+
+                        sessions[sessionId].push({
+                            role: "assistant",
+                            content: fullReply
+                        });
+
+                    }
+
+                    res.write(
+                        `data: ${JSON.stringify({
+                            done: true
+                        })}\n\n`
+                    );
+
+                    res.end();
+                }
+
+            }
+        );
 
     } catch (error) {
 
@@ -346,61 +498,50 @@ app.post("/chat", async (req, res) => {
             "================================="
         );
 
+        if (res.headersSent) {
 
-        // ----------------------------------------------------
-        // API ERRORS
-        // ----------------------------------------------------
+            let errorMessage =
+                "Something went wrong while talking to D-AI.";
 
-        const status =
-            error.response?.status;
+            const status =
+                error.response?.status;
 
+            if (status === 401) {
+                errorMessage =
+                    "The Groq API rejected the server's credentials. Check your GROQ_API_KEY.";
+            }
 
-        if (status === 401) {
+            else if (status === 403) {
+                errorMessage =
+                    "Groq is refusing access to this model for your project.";
+            }
 
-            return res.status(500).json({
-                reply: "The Groq API rejected the server's credentials. Check your GROQ_API_KEY."
-            });
+            else if (status === 429) {
+                errorMessage =
+                    "Groq is rate-limiting the request right now. Give it a moment and try again.";
+            }
 
+            else if (status === 400) {
+                errorMessage =
+                    "Groq rejected that request. Check the server console for the exact error.";
+            }
+
+            res.write(
+                `data: ${JSON.stringify({
+                    error: errorMessage
+                })}\n\n`
+            );
+
+            res.end();
+
+            return;
         }
-
-
-        if (status === 403) {
-
-            return res.status(500).json({
-                reply: "Groq is refusing access to this model for your project. Check your Groq model permissions."
-            });
-
-        }
-
-
-        if (status === 429) {
-
-            return res.status(429).json({
-                reply: "Groq is rate-limiting the request right now. Give it a moment and try again."
-            });
-
-        }
-
-
-        if (status === 400) {
-
-            return res.status(400).json({
-                reply: "Groq rejected that request. Check the server console for the exact error."
-            });
-
-        }
-
-
-        // ----------------------------------------------------
-        // GENERIC ERROR
-        // ----------------------------------------------------
 
         return res.status(500).json({
-            reply: "Something went wrong while talking to D-AI. Try sending your message again."
+            reply:
+                "Something went wrong while talking to D-AI."
         });
-
     }
-
 });
 
 // ============================================================
@@ -415,13 +556,17 @@ app.post("/reset", (req, res) => {
         typeof sessionId === "string" &&
         sessions[sessionId]
     ) {
+
         delete sessions[sessionId];
+
+        sessionCreatedAt.delete(
+            sessionId
+        );
     }
 
     return res.json({
         success: true
     });
-
 });
 
 // ============================================================
@@ -434,7 +579,9 @@ app.get("/health", (req, res) => {
         status: "ok",
         service: "D-AI",
         model: MODEL,
-        groqConfigured: Boolean(GROQ_API_KEY)
+        groqConfigured:
+            Boolean(GROQ_API_KEY),
+        streaming: true
     });
 
 });
@@ -442,16 +589,6 @@ app.get("/health", (req, res) => {
 // ============================================================
 // CLEAN OLD SESSIONS
 // ============================================================
-
-/*
-   This is a simple in-memory session system.
-
-   Sessions aren't permanent database records.
-   To prevent an abandoned server from growing forever,
-   old sessions are periodically removed.
-*/
-
-const sessionCreatedAt = new Map();
 
 setInterval(() => {
 
@@ -465,22 +602,23 @@ setInterval(() => {
                 id,
                 now
             );
-
         }
 
         const age =
-            now - sessionCreatedAt.get(id);
+            now -
+            sessionCreatedAt.get(id);
 
         // 2 hours
 
-        if (age > 2 * 60 * 60 * 1000) {
+        if (
+            age >
+            2 * 60 * 60 * 1000
+        ) {
 
             delete sessions[id];
 
             sessionCreatedAt.delete(id);
-
         }
-
     }
 
 }, 15 * 60 * 1000);
