@@ -1,3548 +1,708 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#212121">
-<meta name="color-scheme" content="dark">
-<title>D-AI</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css">
-
-<style>
-:root{
-    --bg:#212121;
-    --sidebar:#171717;
-    --sidebar-hover:#292929;
-    --input:#2f2f2f;
-    --input-hover:#363636;
-    --border:rgba(255,255,255,.10);
-    --border-light:rgba(255,255,255,.06);
-    --text:#ececec;
-    --muted:#999;
-    --dim:#707070;
-    --accent:#4f8cff;
-    --accent-hover:#6b9cff;
-    --danger:#d65b5b;
-    --chat-width:900px;
-    --sidebar-width:270px;
-    --font:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    --mono:"Fira Code",monospace;
-}
-
-*{
-    box-sizing:border-box;
-}
-
-html,
-body{
-    width:100%;
-    height:100%;
-    margin:0;
-}
-
-body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font);
-    overflow:hidden;
-}
-
-button,
-input,
-textarea{
-    font-family:inherit;
-}
-
-button{
-    color:inherit;
-}
-
-.app{
-    width:100%;
-    height:100dvh;
-    display:flex;
-}
-
-/* SIDEBAR */
-
-.sidebar{
-    width:var(--sidebar-width);
-    height:100%;
-    flex-shrink:0;
-    background:var(--sidebar);
-    border-right:1px solid var(--border-light);
-    display:flex;
-    flex-direction:column;
-    z-index:100;
-    transition:transform .22s ease;
-}
-
-.sidebar-top{
-    padding:13px 11px 7px;
-}
-
-.brand{
-    height:40px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:0 8px;
-}
-
-.brand-icon{
-    width:29px;
-    height:29px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:8px;
-    background:#376fc9;
-    color:white;
-    font-size:14px;
-}
-
-.brand-name{
-    font-size:15px;
-    font-weight:600;
-}
-
-.new-chat{
-    width:100%;
-    height:41px;
-    margin-top:9px;
-    padding:0 11px;
-    display:flex;
-    align-items:center;
-    gap:9px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:transparent;
-    color:#e8e8e8;
-    cursor:pointer;
-    font-size:13px;
-    transition:.15s;
-}
-
-.new-chat:hover{
-    background:var(--sidebar-hover);
-    border-color:rgba(255,255,255,.15);
-}
-
-.new-chat-plus{
-    font-size:18px;
-    color:#bbb;
-}
-
-.search-area{
-    padding:7px 11px;
-}
-
-.search-box{
-    width:100%;
-    height:36px;
-    padding:0 10px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    outline:none;
-    background:#202020;
-    color:#eee;
-    font-size:12px;
-}
-
-.search-box:focus{
-    border-color:rgba(255,255,255,.2);
-}
-
-.search-box::placeholder{
-    color:#666;
-}
-
-.sidebar-title{
-    padding:12px 17px 7px;
-    color:#666;
-    font-size:10px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.8px;
-}
-
-.chat-list{
-    flex:1;
-    overflow-y:auto;
-    padding:0 7px;
-}
-
-.chat-list::-webkit-scrollbar{
-    width:5px;
-}
-
-.chat-list::-webkit-scrollbar-thumb{
-    background:#444;
-    border-radius:10px;
-}
-
-.chat-row{
-    width:100%;
-    min-height:39px;
-    display:flex;
-    align-items:center;
-    gap:7px;
-    padding:7px 8px 7px 10px;
-    margin-bottom:2px;
-    border:1px solid transparent;
-    border-radius:7px;
-    background:transparent;
-    color:#c5c5c5;
-    text-align:left;
-    cursor:pointer;
-}
-
-.chat-row:hover,
-.chat-row.active{
-    background:var(--sidebar-hover);
-}
-
-.chat-title{
-    flex:1;
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    font-size:12px;
-}
-
-.chat-more{
-    width:25px;
-    height:25px;
-    flex-shrink:0;
-    border:0;
-    border-radius:5px;
-    background:transparent;
-    color:#888;
-    cursor:pointer;
-    opacity:0;
-}
-
-.chat-row:hover .chat-more{
-    opacity:1;
-}
-
-.chat-more:hover{
-    background:#3a3a3a;
-    color:white;
-}
-
-.empty-chats{
-    padding:20px 12px;
-    text-align:center;
-    color:#666;
-    font-size:11px;
-}
-
-.sidebar-footer{
-    padding:8px;
-    border-top:1px solid var(--border-light);
-}
-
-.footer-button,
-.footer-link{
-    width:100%;
-    min-height:36px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:8px 10px;
-    border:0;
-    border-radius:7px;
-    background:transparent;
-    color:#999;
-    text-decoration:none;
-    text-align:left;
-    font-size:12px;
-    cursor:pointer;
-}
-
-.footer-button:hover,
-.footer-link:hover{
-    background:var(--sidebar-hover);
-    color:white;
-}
-
-/* MAIN */
-
-.main{
-    min-width:0;
-    flex:1;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-}
-
-.topbar{
-    height:55px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:0 18px;
-    border-bottom:1px solid var(--border-light);
-    background:rgba(33,33,33,.96);
-    z-index:10;
-}
-
-.menu-button{
-    width:34px;
-    height:34px;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    border:0;
-    border-radius:7px;
-    background:transparent;
-    color:#ccc;
-    font-size:18px;
-    cursor:pointer;
-}
-
-.menu-button:hover{
-    background:#303030;
-}
-
-.topbar-title{
-    font-size:14px;
-    font-weight:600;
-}
-
-.topbar-model{
-    color:#737373;
-    font-size:11px;
-}
-
-.connection{
-    margin-left:auto;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    color:#777;
-    font-size:10px;
-}
-
-.connection-dot{
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:#55b77a;
-}
-
-.connection-dot.offline{
-    background:#c45b5b;
-}
-
-/* CHAT */
-
-.chat-scroll{
-    flex:1;
-    min-height:0;
-    overflow-y:auto;
-    scrollbar-width:thin;
-    scrollbar-color:#505050 transparent;
-}
-
-.chat-scroll::-webkit-scrollbar{
-    width:6px;
-}
-
-.chat-scroll::-webkit-scrollbar-thumb{
-    background:#505050;
-    border-radius:20px;
-}
-
-.welcome{
-    min-height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:40px 20px 155px;
-    text-align:center;
-}
-
-.welcome-icon{
-    width:52px;
-    height:52px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#376fc9;
-    border-radius:14px;
-    font-size:22px;
-    color:white;
-    margin-bottom:18px;
-}
-
-.welcome-title{
-    margin:0;
-    font-size:29px;
-    font-weight:600;
-    letter-spacing:-.8px;
-}
-
-.welcome-description{
-    margin:10px 0 0;
-    color:#929292;
-    font-size:13px;
-    line-height:1.6;
-}
-
-.welcome-grid{
-    width:min(730px,100%);
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-    margin-top:30px;
-}
-
-.welcome-card{
-    min-height:85px;
-    padding:13px 14px;
-    text-align:left;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:transparent;
-    cursor:pointer;
-    transition:.15s;
-}
-
-.welcome-card:hover{
-    background:#292929;
-    border-color:rgba(255,255,255,.15);
-    transform:translateY(-1px);
-}
-
-.card-icon{
-    display:block;
-    margin-bottom:7px;
-    color:#aaa;
-}
-
-.card-title{
-    display:block;
-    font-size:12.5px;
-    font-weight:500;
-}
-
-.card-description{
-    margin-top:4px;
-    color:#707070;
-    font-size:11px;
-}
-
-.messages{
-    width:min(var(--chat-width),100%);
-    margin:0 auto;
-    padding:30px 20px 180px;
-}
-
-.message{
-    display:flex;
-    gap:13px;
-    margin-bottom:30px;
-}
-
-.avatar{
-    width:29px;
-    height:29px;
-    flex:0 0 29px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:8px;
-    font-size:12px;
-    margin-top:1px;
-}
-
-.avatar-ai{
-    background:#376fc9;
-    color:white;
-}
-
-.avatar-user{
-    background:#414141;
-    color:#ddd;
-}
-
-.message-body{
-    min-width:0;
-    flex:1;
-}
-
-.message-label{
-    margin-bottom:5px;
-    color:#999;
-    font-size:11px;
-    font-weight:600;
-}
-
-.message-text{
-    color:#e2e2e2;
-    font-size:14px;
-    line-height:1.7;
-    word-break:break-word;
-}
-
-.message-text p{
-    margin:0 0 10px;
-}
-
-.message-text p:last-child{
-    margin-bottom:0;
-}
-
-.message-text strong{
-    color:white;
-    font-weight:600;
-}
-
-.message-text a{
-    color:#72a3ff;
-}
-
-.message-text ul,
-.message-text ol{
-    margin:9px 0;
-    padding-left:23px;
-}
-
-.message-text li{
-    margin:4px 0;
-}
-
-.message-text h1,
-.message-text h2,
-.message-text h3{
-    color:white;
-    line-height:1.3;
-    margin:18px 0 8px;
-}
-
-.message-text h1{font-size:21px}
-.message-text h2{font-size:18px}
-.message-text h3{font-size:16px}
-
-.message-text blockquote{
-    margin:12px 0;
-    padding-left:13px;
-    border-left:3px solid #555;
-    color:#aaa;
-}
-
-.message-text code{
-    font-family:var(--mono);
-    font-size:12px;
-    padding:2px 5px;
-    border-radius:5px;
-    background:#171717;
-    border:1px solid rgba(255,255,255,.08);
-}
-
-.code-container{
-    position:relative;
-    margin:13px 0;
-}
-
-.message-text pre{
-    margin:0;
-    padding:14px;
-    overflow:auto;
-    border-radius:9px;
-    background:#171717;
-    border:1px solid rgba(255,255,255,.08);
-}
-
-.message-text pre code{
-    padding:0;
-    background:transparent;
-    border:0;
-    color:#ddd;
-    line-height:1.6;
-}
-
-.copy-code{
-    position:absolute;
-    top:8px;
-    right:8px;
-    padding:5px 8px;
-    border:1px solid var(--border);
-    border-radius:6px;
-    background:#252525;
-    color:#aaa;
-    font-size:10px;
-    cursor:pointer;
-}
-
-.copy-code:hover{
-    background:#333;
-    color:white;
-}
-
-.message-actions{
-    display:flex;
-    gap:3px;
-    margin-top:8px;
-}
-
-.message-action{
-    padding:5px 7px;
-    border:0;
-    border-radius:6px;
-    background:transparent;
-    color:#777;
-    font-size:11px;
-    cursor:pointer;
-}
-
-.message-action:hover{
-    background:#303030;
-    color:#ddd;
-}
-
-/* THINKING */
-
-.thinking{
-    display:flex;
-    gap:13px;
-    margin-bottom:28px;
-}
-
-.thinking-text{
-    display:flex;
-    align-items:center;
-    gap:4px;
-    padding-top:6px;
-    color:#777;
-    font-size:12px;
-}
-
-.thinking-dot{
-    width:4px;
-    height:4px;
-    background:#888;
-    border-radius:50%;
-    animation:thinking 1.25s infinite;
-}
-
-.thinking-dot:nth-child(2){animation-delay:.15s}
-.thinking-dot:nth-child(3){animation-delay:.3s}
-
-@keyframes thinking{
-    0%,65%,100%{
-        opacity:.25;
-        transform:translateY(0);
-    }
-    30%{
-        opacity:1;
-        transform:translateY(-2px);
-    }
-}
-
-/* COMPOSER */
-
-.composer-area{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    padding:17px 20px 20px;
-    background:linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(33,33,33,.88) 30%,
-        #212121 58%
-    );
-    pointer-events:none;
-}
-
-.composer{
-    width:min(840px,100%);
-    margin:0 auto;
-    display:flex;
-    align-items:flex-end;
-    gap:5px;
-    padding:8px;
-    background:var(--input);
-    border:1px solid var(--border);
-    border-radius:14px;
-    box-shadow:0 5px 25px rgba(0,0,0,.18);
-    pointer-events:auto;
-    transition:.15s;
-}
-
-.composer:focus-within{
-    border-color:rgba(255,255,255,.18);
-    box-shadow:0 6px 30px rgba(0,0,0,.25);
-}
-
-#msg{
-    flex:1;
-    min-width:0;
-    min-height:39px;
-    max-height:180px;
-    resize:none;
-    padding:9px 7px;
-    border:0;
-    outline:0;
-    background:transparent;
-    color:#eee;
-    font-size:14px;
-    line-height:1.5;
-}
-
-#msg::placeholder{
-    color:#808080;
-}
-
-.action-button{
-    width:38px;
-    height:38px;
-    flex:0 0 38px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:0;
-    border-radius:9px;
-    background:transparent;
-    color:#aaa;
-    font-size:17px;
-    cursor:pointer;
-}
-
-.action-button:hover{
-    background:#414141;
-    color:white;
-}
-
-.send-button{
-    background:white;
-    color:#222;
-    font-weight:700;
-}
-
-.send-button:hover{
-    background:#e8e8e8;
-    color:#111;
-}
-
-.send-button:disabled{
-    background:#555;
-    color:#888;
-    cursor:not-allowed;
-}
-
-.stop-button{
-    display:none;
-    background:#5a3030;
-    color:#ffbebe;
-}
-
-.stop-button:hover{
-    background:#713838;
-}
-
-.composer-hint{
-    width:min(840px,100%);
-    margin:7px auto 0;
-    text-align:center;
-    color:#626262;
-    font-size:10px;
-}
-
-/* MODALS */
-
-.modal-overlay{
-    position:fixed;
-    inset:0;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    background:rgba(0,0,0,.65);
-    z-index:500;
-}
-
-.modal{
-    width:min(440px,100%);
-    max-height:80vh;
-    overflow:auto;
-    padding:20px;
-    background:#242424;
-    border:1px solid var(--border);
-    border-radius:13px;
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
-}
-
-.modal h2{
-    margin:0 0 15px;
-    font-size:17px;
-}
-
-.modal p{
-    color:#999;
-    font-size:12px;
-    line-height:1.6;
-}
-
-.modal-input{
-    width:100%;
-    height:40px;
-    padding:0 10px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    outline:none;
-    background:#171717;
-    color:#eee;
-}
-
-.modal-input:focus{
-    border-color:#555;
-}
-
-.modal-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
-    margin-top:17px;
-}
-
-.modal-button{
-    padding:8px 12px;
-    border:1px solid var(--border);
-    border-radius:7px;
-    background:#303030;
-    color:#ddd;
-    cursor:pointer;
-    font-size:12px;
-}
-
-.modal-button:hover{
-    background:#393939;
-}
-
-.modal-button.primary{
-    background:white;
-    color:#222;
-    border-color:white;
-}
-
-.settings-row{
-    min-height:45px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    border-bottom:1px solid var(--border-light);
-    font-size:12px;
-}
-
-.settings-row:last-child{
-    border-bottom:0;
-}
-
-.settings-description{
-    color:#999;
-    margin-top:3px;
-    font-size:10px;
-}
-
-.toggle{
-    width:40px;
-    height:22px;
-    position:relative;
-    border:0;
-    border-radius:20px;
-    background:#555;
-    cursor:pointer;
-}
-
-.toggle::after{
-    content:"";
-    position:absolute;
-    top:3px;
-    left:3px;
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    background:white;
-    transition:.18s;
-}
-
-.toggle.on{
-    background:var(--accent);
-}
-
-.toggle.on::after{
-    left:21px;
-}
-
-/* TOAST */
-
-.toast{
-    position:fixed;
-    left:50%;
-    bottom:105px;
-    transform:translate(-50%,15px);
-    opacity:0;
-    pointer-events:none;
-    z-index:1000;
-    padding:9px 13px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:#303030;
-    color:#eee;
-    font-size:11px;
-    transition:.2s;
-}
-
-.toast.show{
-    opacity:1;
-    transform:translate(-50%,0);
-}
-
-/* MOBILE */
-
-@media(max-width:760px){
-
-    .sidebar{
-        position:fixed;
-        left:0;
-        top:0;
-        bottom:0;
-        transform:translateX(-100%);
-        box-shadow:12px 0 35px rgba(0,0,0,.4);
-    }
-
-    .sidebar.open{
-        transform:translateX(0);
-    }
-
-    .menu-button{
-        display:flex;
-    }
-
-    .topbar{
-        padding:0 12px;
-    }
-
-    .topbar-model{
-        display:none;
-    }
-
-    .connection{
-        display:none;
-    }
-
-    .welcome{
-        padding:30px 14px 155px;
-    }
-
-    .welcome-title{
-        font-size:25px;
-    }
-
-    .welcome-grid{
-        grid-template-columns:1fr;
-    }
-
-    .messages{
-        padding:24px 13px 175px;
-    }
-
-    .message{
-        gap:10px;
-        margin-bottom:25px;
-    }
-
-    .composer-area{
-        padding:12px 10px 17px;
-    }
-
-    .composer{
-        border-radius:13px;
-    }
-}
-
-@media(max-width:380px){
-
-    .welcome-title{
-        font-size:23px;
-    }
-
-    .welcome-description{
-        font-size:12px;
-    }
-
-    .messages{
-        padding-left:10px;
-        padding-right:10px;
-    }
-
-    .message-text{
-        font-size:13.5px;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>D-AI</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #0d0d0d;
+            color: white;
+            font-family:
+                Inter,
+                Arial,
+                sans-serif;
+
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 64px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 22px;
+
+            border-bottom:
+                1px solid #242424;
+
+            background: #111;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #55ff88;
+        }
+
+        #chat {
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding:
+                30px
+                max(20px, calc((100vw - 900px) / 2));
+        }
+
+        .message {
+            max-width: 850px;
+
+            margin:
+                0 auto
+                22px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+
+            word-wrap: break-word;
+        }
+
+        .user {
+            background: #1d1d1d;
+
+            padding: 14px 17px;
+
+            border-radius: 14px;
+
+            margin-bottom: 15px;
+        }
+
+        .assistant {
+            padding:
+                5px 17px;
+
+            color: #eeeeee;
+        }
+
+        .label {
+            font-size: 12px;
+
+            color: #777;
+
+            margin-bottom: 5px;
+        }
+
+        .composer {
+            padding:
+                15px
+                max(20px, calc((100vw - 900px) / 2));
+
+            border-top:
+                1px solid #242424;
+
+            background: #111;
+        }
+
+        form {
+            max-width: 850px;
+
+            margin: auto;
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+        textarea {
+            flex: 1;
+
+            resize: none;
+
+            min-height: 52px;
+            max-height: 180px;
+
+            padding: 15px;
+
+            border:
+                1px solid #333;
+
+            border-radius: 13px;
+
+            background: #1a1a1a;
+
+            color: white;
+
+            outline: none;
+
+            font-family: inherit;
+
+            font-size: 15px;
+        }
+
+        textarea:focus {
+            border-color: #55ff88;
+        }
+
+        button {
+            width: 80px;
+
+            border: none;
+
+            border-radius: 13px;
+
+            background: #55ff88;
+
+            color: #07110b;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            filter: brightness(0.9);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+
+            cursor: not-allowed;
+        }
+
+        .typing {
+            display: inline-block;
+
+            width: 7px;
+            height: 18px;
+
+            background: #55ff88;
+
+            vertical-align: middle;
+
+            animation:
+                blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+
+        }
+
+        .empty {
+            height: 100%;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: #666;
+
+            font-size: 18px;
+        }
+
+    </style>
 </head>
 
 <body>
 
-<div class="app">
+    <header>
+        <div class="logo">
+            <span>D</span>-AI
+        </div>
+    </header>
 
-<aside class="sidebar" id="sidebar">
 
-    <div class="sidebar-top">
+    <main id="chat">
 
-        <div class="brand">
-            <div class="brand-icon">✦</div>
-            <span class="brand-name">D-AI</span>
+        <div
+            id="empty"
+            class="empty"
+        >
+            What can I help you with?
         </div>
 
-        <button class="new-chat" id="newChatButton">
-            <span class="new-chat-plus">＋</span>
-            <span>New chat</span>
-        </button>
+    </main>
 
-    </div>
-
-    <div class="search-area">
-        <input
-            id="chatSearch"
-            class="search-box"
-            placeholder="Search chats..."
-            autocomplete="off"
-        >
-    </div>
-
-    <div class="sidebar-title">
-        Your chats
-    </div>
-
-    <div
-        class="chat-list"
-        id="chatList"
-    ></div>
-
-    <div class="sidebar-footer">
-
-        <button
-            class="footer-button"
-            id="settingsButton"
-        >
-            <span>⚙</span>
-            <span>Settings</span>
-        </button>
-
-        <a
-            class="footer-link"
-            href="https://d-ai.xo.je/faq"
-            target="_blank"
-            rel="noopener"
-        >
-            <span>?</span>
-            <span>FAQ & Help</span>
-        </a>
-
-        <a
-            class="footer-link"
-            href="https://discord.gg/XCETB7bYCa"
-            target="_blank"
-            rel="noopener"
-        >
-            <span>◌</span>
-            <span>Discord</span>
-        </a>
-
-    </div>
-
-</aside>
-
-<div
-    class="overlay"
-    id="overlay"
-></div>
-
-<main class="main">
-
-<header class="topbar">
-
-    <button
-        class="menu-button"
-        id="menuButton"
-        aria-label="Open sidebar"
-    >
-        ☰
-    </button>
-
-    <span class="topbar-title">
-        D-AI
-    </span>
-
-    <span class="topbar-model">
-        AI assistant
-    </span>
-
-    <div class="connection">
-        <span
-            class="connection-dot"
-            id="connectionDot"
-        ></span>
-        <span id="connectionText">Ready</span>
-    </div>
-
-</header>
-
-<div
-    class="chat-scroll"
-    id="chatScroll"
->
-
-<section
-    class="welcome"
-    id="welcome"
->
-
-    <div class="welcome-icon">
-        ✦
-    </div>
-
-    <h1 class="welcome-title">
-        How can I help?
-    </h1>
-
-    <p class="welcome-description">
-        Ask a question, work through a problem,<br>
-        or just start a conversation.
-    </p>
-
-    <div
-        class="welcome-grid"
-        id="welcomeGrid"
-    ></div>
-
-</section>
-
-<div
-    class="messages"
-    id="messages"
-    style="display:none"
-></div>
-
-</div>
-
-<div class="composer-area">
 
     <div class="composer">
 
-        <textarea
-            id="msg"
-            rows="1"
-            placeholder="Message D-AI..."
-            autocomplete="off"
-            spellcheck="true"
-        ></textarea>
+        <form id="chatForm">
 
-        <button
-            class="action-button stop-button"
-            id="stopButton"
-            title="Stop generating"
-            aria-label="Stop generating"
-        >
-            ■
-        </button>
+            <textarea
+                id="message"
+                placeholder="Message D-AI..."
+                autocomplete="off"
+                rows="1"
+            ></textarea>
 
-        <button
-            class="action-button send-button"
-            id="sendButton"
-            title="Send"
-            aria-label="Send"
-        >
-            ↑
-        </button>
+            <button
+                id="sendButton"
+                type="submit"
+            >
+                Send
+            </button>
+
+        </form>
 
     </div>
 
-    <div class="composer-hint">
-        D-AI can make mistakes. Check important information.
-    </div>
 
-</div>
+    <script>
 
-</main>
-</div>
+        // ====================================================
+        // SESSION
+        // ====================================================
 
-<!-- RENAME MODAL -->
-
-<div
-    class="modal-overlay"
-    id="renameModal"
->
-
-    <div class="modal">
-
-        <h2>Rename chat</h2>
-
-        <input
-            class="modal-input"
-            id="renameInput"
-            maxlength="80"
-            placeholder="Chat name"
-        >
-
-        <div class="modal-actions">
-
-            <button
-                class="modal-button"
-                id="renameCancel"
-            >
-                Cancel
-            </button>
-
-            <button
-                class="modal-button primary"
-                id="renameSave"
-            >
-                Save
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- SETTINGS MODAL -->
-
-<div
-    class="modal-overlay"
-    id="settingsModal"
->
-
-    <div class="modal">
-
-        <h2>Settings</h2>
-
-        <div class="settings-row">
-
-            <div>
-                <div>Enter to send</div>
-                <div class="settings-description">
-                    Enter sends your message. Shift+Enter makes a new line.
-                </div>
-            </div>
-
-            <button
-                class="toggle on"
-                id="enterToggle"
-            ></button>
-
-        </div>
-
-        <div class="settings-row">
-
-            <div>
-                <div>Save chats locally</div>
-                <div class="settings-description">
-                    Keep your chat list and messages in this browser.
-                </div>
-            </div>
-
-            <button
-                class="toggle on"
-                id="saveToggle"
-            ></button>
-
-        </div>
-
-        <div class="settings-row">
-
-            <div>
-                <div>Clear all local chats</div>
-                <div class="settings-description">
-                    Permanently remove chats saved in this browser.
-                </div>
-            </div>
-
-            <button
-                class="modal-button"
-                id="clearAllButton"
-            >
-                Clear
-            </button>
-
-        </div>
-
-        <div class="modal-actions">
-
-            <button
-                class="modal-button primary"
-                id="settingsClose"
-            >
-                Done
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<div
-    class="toast"
-    id="toast"
-></div>
-
-<script>
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
-const STORAGE_KEY = "d-ai-chats-v3";
-const ACTIVE_KEY = "d-ai-active-chat-v3";
-const SAVE_KEY = "d-ai-save-chats-v3";
-const ENTER_KEY = "d-ai-enter-send-v3";
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const sidebar =
-    document.getElementById("sidebar");
-
-const overlay =
-    document.getElementById("overlay");
-
-const menuButton =
-    document.getElementById("menuButton");
-
-const newChatButton =
-    document.getElementById("newChatButton");
-
-const chatList =
-    document.getElementById("chatList");
-
-const chatSearch =
-    document.getElementById("chatSearch");
-
-const welcome =
-    document.getElementById("welcome");
-
-const welcomeGrid =
-    document.getElementById("welcomeGrid");
-
-const messages =
-    document.getElementById("messages");
-
-const chatScroll =
-    document.getElementById("chatScroll");
-
-const input =
-    document.getElementById("msg");
-
-const sendButton =
-    document.getElementById("sendButton");
-
-const stopButton =
-    document.getElementById("stopButton");
-
-const connectionDot =
-    document.getElementById("connectionDot");
-
-const connectionText =
-    document.getElementById("connectionText");
-
-const settingsButton =
-    document.getElementById("settingsButton");
-
-const settingsModal =
-    document.getElementById("settingsModal");
-
-const renameModal =
-    document.getElementById("renameModal");
-
-const renameInput =
-    document.getElementById("renameInput");
-
-const toast =
-    document.getElementById("toast");
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-let saveChats =
-    localStorage.getItem(SAVE_KEY) !== "false";
-
-let enterToSend =
-    localStorage.getItem(ENTER_KEY) !== "false";
-
-
-/* =========================================================
-   DATA
-========================================================= */
-
-let chats = [];
-
-let activeChatId = null;
-
-let sending = false;
-
-let currentController = null;
-
-let renameTarget = null;
-
-
-/* =========================================================
-   UTILITIES
-========================================================= */
-
-function id(){
-
-    if(
-        window.crypto &&
-        crypto.randomUUID
-    ){
-        return crypto.randomUUID();
-    }
-
-    return (
-        Date.now().toString(36) +
-        Math.random().toString(36).slice(2)
-    );
-
-}
-
-
-function now(){
-
-    return Date.now();
-
-}
-
-
-function escapeHTML(text){
-
-    return String(text)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-
-}
-
-
-function showToast(text){
-
-    toast.textContent = text;
-
-    toast.classList.add("show");
-
-    clearTimeout(showToast.timer);
-
-    showToast.timer =
-        setTimeout(
-            () => toast.classList.remove("show"),
-            1800
-        );
-
-}
-
-
-/* =========================================================
-   STORAGE
-========================================================= */
-
-function loadChats(){
-
-    try{
-
-        const raw =
+        let sessionId =
             localStorage.getItem(
-                STORAGE_KEY
+                "dai_session"
             );
 
-        chats =
-            raw
-                ? JSON.parse(raw)
-                : [];
+        if (!sessionId) {
 
-    }catch{
+            sessionId =
+                crypto.randomUUID();
 
-        chats = [];
-
-    }
-
-}
-
-
-function save(){
-
-    if(!saveChats){
-        return;
-    }
-
-    try{
-
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(chats)
-        );
-
-        localStorage.setItem(
-            ACTIVE_KEY,
-            activeChatId || ""
-        );
-
-    }catch{
-
-        showToast(
-            "Couldn't save chats in this browser."
-        );
-
-    }
-
-}
-
-
-function loadActive(){
-
-    const saved =
-        localStorage.getItem(
-            ACTIVE_KEY
-        );
-
-    if(
-        saved &&
-        chats.some(
-            chat => chat.id === saved
-        )
-    ){
-
-        activeChatId = saved;
-
-    }
-
-}
-
-
-/* =========================================================
-   CHAT CREATION
-========================================================= */
-
-function createChat(){
-
-    const chat = {
-
-        id:id(),
-
-        title:"New chat",
-
-        createdAt:now(),
-
-        updatedAt:now(),
-
-        sessionId:id(),
-
-        messages:[]
-
-    };
-
-    chats.unshift(chat);
-
-    activeChatId =
-        chat.id;
-
-    save();
-
-    renderChatList();
-
-    renderMessages();
-
-    input.focus();
-
-    return chat;
-
-}
-
-
-function getActiveChat(){
-
-    return chats.find(
-        chat => chat.id === activeChatId
-    );
-
-}
-
-
-/* =========================================================
-   CHAT TITLES
-========================================================= */
-
-function generateTitle(text){
-
-    let title =
-        text
-            .replace(/\s+/g," ")
-            .trim();
-
-    if(!title){
-        return "New chat";
-    }
-
-    if(title.length > 42){
-        title =
-            title.slice(0,42).trim() +
-            "…";
-    }
-
-    return title;
-
-}
-
-
-/* =========================================================
-   CHAT LIST
-========================================================= */
-
-function renderChatList(){
-
-    const search =
-        chatSearch.value
-            .trim()
-            .toLowerCase();
-
-    chatList.innerHTML = "";
-
-    const filtered =
-        chats.filter(chat =>
-            chat.title
-                .toLowerCase()
-                .includes(search)
-        );
-
-    if(!filtered.length){
-
-        chatList.innerHTML =
-            `<div class="empty-chats">
-                ${search
-                    ? "No matching chats."
-                    : "Your conversations will appear here."
-                }
-            </div>`;
-
-        return;
-
-    }
-
-    filtered.forEach(chat => {
-
-        const row =
-            document.createElement("div");
-
-        row.className =
-            "chat-row" +
-            (
-                chat.id === activeChatId
-                    ? " active"
-                    : ""
+            localStorage.setItem(
+                "dai_session",
+                sessionId
             );
-
-        row.onclick =
-            () => switchChat(chat.id);
-
-
-        const title =
-            document.createElement("span");
-
-        title.className =
-            "chat-title";
-
-        title.textContent =
-            chat.title;
-
-
-        const more =
-            document.createElement("button");
-
-        more.className =
-            "chat-more";
-
-        more.textContent =
-            "⋯";
-
-        more.title =
-            "Chat options";
-
-
-        more.onclick =
-            event => {
-
-                event.stopPropagation();
-
-                openChatMenu(chat);
-
-            };
-
-
-        row.appendChild(title);
-
-        row.appendChild(more);
-
-        chatList.appendChild(row);
-
-    });
-
-}
-
-
-/* =========================================================
-   CHAT MENU
-========================================================= */
-
-function openChatMenu(chat){
-
-    const action =
-        prompt(
-            `Chat: ${chat.title}\n\nType:\nrename\nor\ndelete`
-        );
-
-    if(!action){
-        return;
-    }
-
-    if(
-        action.toLowerCase() ===
-        "rename"
-    ){
-
-        openRename(chat);
-
-    }
-
-    else if(
-        action.toLowerCase() ===
-        "delete"
-    ){
-
-        deleteChat(chat.id);
-
-    }
-
-}
-
-
-/* =========================================================
-   SWITCH CHAT
-========================================================= */
-
-function switchChat(chatId){
-
-    if(sending){
-        return;
-    }
-
-    activeChatId =
-        chatId;
-
-    save();
-
-    renderChatList();
-
-    renderMessages();
-
-    closeSidebar();
-
-    input.focus();
-
-}
-
-
-/* =========================================================
-   DELETE CHAT
-========================================================= */
-
-async function deleteChat(chatId){
-
-    const chat =
-        chats.find(
-            item => item.id === chatId
-        );
-
-    if(!chat){
-        return;
-    }
-
-    if(
-        !confirm(
-            `Delete "${chat.title}"?`
-        )
-    ){
-        return;
-    }
-
-    try{
-
-        await fetch(
-            "/reset",
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":
-                        "application/json"
-                },
-                body:JSON.stringify({
-                    sessionId:
-                        chat.sessionId
-                })
-            }
-        );
-
-    }catch{
-
-        // Local deletion still works.
-
-    }
-
-    chats =
-        chats.filter(
-            item => item.id !== chatId
-        );
-
-    if(activeChatId === chatId){
-
-        activeChatId =
-            chats[0]?.id || null;
-
-    }
-
-    save();
-
-    if(!activeChatId){
-
-        createChat();
-
-    }else{
-
-        renderChatList();
-
-        renderMessages();
-
-    }
-
-}
-
-
-/* =========================================================
-   RENAME
-========================================================= */
-
-function openRename(chat){
-
-    renameTarget =
-        chat;
-
-    renameInput.value =
-        chat.title;
-
-    renameModal.style.display =
-        "flex";
-
-    setTimeout(
-        () => {
-            renameInput.focus();
-            renameInput.select();
-        },
-        50
-    );
-
-}
-
-
-function closeRename(){
-
-    renameModal.style.display =
-        "none";
-
-    renameTarget =
-        null;
-
-}
-
-
-document
-    .getElementById("renameCancel")
-    .onclick =
-    closeRename;
-
-
-document
-    .getElementById("renameSave")
-    .onclick =
-    () => {
-
-        if(!renameTarget){
-            return;
         }
 
-        const value =
-            renameInput.value.trim();
 
-        if(value){
+        // ====================================================
+        // ELEMENTS
+        // ====================================================
 
-            renameTarget.title =
-                value;
-
-            renameTarget.updatedAt =
-                now();
-
-            save();
-
-            renderChatList();
-
-        }
-
-        closeRename();
-
-    };
-
-
-renameInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(event.key === "Enter"){
-
-            event.preventDefault();
-
-            document
-                .getElementById("renameSave")
-                .click();
-
-        }
-
-        if(event.key === "Escape"){
-
-            closeRename();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   RENDER MESSAGES
-========================================================= */
-
-function renderMessages(){
-
-    const chat =
-        getActiveChat();
-
-    messages.innerHTML = "";
-
-    if(
-        !chat ||
-        !chat.messages.length
-    ){
-
-        welcome.style.display =
-            "flex";
-
-        messages.style.display =
-            "none";
-
-        return;
-
-    }
-
-    welcome.style.display =
-        "none";
-
-    messages.style.display =
-        "block";
-
-
-    chat.messages.forEach(
-        (message,index) => {
-
-            renderMessage(
-                message,
-                index
+        const chat =
+            document.getElementById(
+                "chat"
             );
 
-        }
-    );
-
-    scrollBottom(false);
-
-}
-
-
-/* =========================================================
-   MARKDOWN
-========================================================= */
-
-if(window.marked){
-
-    marked.setOptions({
-
-        breaks:true,
-
-        gfm:true,
-
-        headerIds:false,
-
-        mangle:false
-
-    });
-
-}
-
-
-/* =========================================================
-   RENDER MESSAGE
-========================================================= */
-
-function renderMessage(
-    message,
-    index
-){
-
-    const ai =
-        message.role === "assistant";
-
-    const wrapper =
-        document.createElement("div");
-
-    wrapper.className =
-        "message";
-
-
-    const avatar =
-        document.createElement("div");
-
-    avatar.className =
-        "avatar " +
-        (
-            ai
-                ? "avatar-ai"
-                : "avatar-user"
-        );
-
-    avatar.textContent =
-        ai
-            ? "✦"
-            : "U";
-
-
-    const body =
-        document.createElement("div");
-
-    body.className =
-        "message-body";
-
-
-    const label =
-        document.createElement("div");
-
-    label.className =
-        "message-label";
-
-    label.textContent =
-        ai
-            ? "D-AI"
-            : "You";
-
-
-    const content =
-        document.createElement("div");
-
-    content.className =
-        "message-text";
-
-
-    if(ai){
-
-        content.innerHTML =
-            window.marked
-                ? marked.parse(
-                    message.content
-                )
-                : escapeHTML(
-                    message.content
-                );
-
-        enhanceCode(content);
-
-    }else{
-
-        content.innerHTML =
-            escapeHTML(
-                message.content
-            ).replace(
-                /\n/g,
-                "<br>"
+        const form =
+            document.getElementById(
+                "chatForm"
             );
 
-    }
-
-
-    body.appendChild(label);
-
-    body.appendChild(content);
-
-
-    const actions =
-        document.createElement("div");
-
-    actions.className =
-        "message-actions";
-
-
-    const copy =
-        document.createElement("button");
-
-    copy.className =
-        "message-action";
-
-    copy.textContent =
-        "Copy";
-
-    copy.onclick =
-        () => copyText(
-            message.content
-        );
-
-
-    actions.appendChild(copy);
-
-
-    if(ai){
-
-        const regenerate =
-            document.createElement("button");
-
-        regenerate.className =
-            "message-action";
-
-        regenerate.textContent =
-            "Regenerate";
-
-        regenerate.onclick =
-            () => regenerateResponse(
-                index
+        const input =
+            document.getElementById(
+                "message"
             );
 
-        actions.appendChild(
-            regenerate
-        );
-
-    }else{
-
-        const edit =
-            document.createElement("button");
-
-        edit.className =
-            "message-action";
-
-        edit.textContent =
-            "Edit";
-
-        edit.onclick =
-            () => editMessage(
-                index
+        const sendButton =
+            document.getElementById(
+                "sendButton"
             );
 
-        actions.appendChild(edit);
-
-    }
-
-
-    body.appendChild(actions);
-
-    wrapper.appendChild(avatar);
-
-    wrapper.appendChild(body);
-
-    messages.appendChild(wrapper);
-
-}
+        const empty =
+            document.getElementById(
+                "empty"
+            );
 
 
-/* =========================================================
-   CODE BLOCKS
-========================================================= */
+        // ====================================================
+        // ADD MESSAGE
+        // ====================================================
 
-function enhanceCode(container){
+        function addMessage(
+            text,
+            type
+        ) {
 
-    container
-        .querySelectorAll("pre")
-        .forEach(pre => {
-
-            const code =
-                pre.querySelector("code");
-
-            if(!code){
-                return;
+            if (empty) {
+                empty.remove();
             }
 
-            try{
-
-                hljs.highlightElement(
-                    code
-                );
-
-            }catch{
-
-                // Keep normal code if
-                // highlighting fails.
-
-            }
-
-
-            const box =
+            const wrapper =
                 document.createElement(
                     "div"
                 );
 
-            box.className =
-                "code-container";
+            wrapper.className =
+                `message ${type}`;
 
-
-            pre.parentNode.insertBefore(
-                box,
-                pre
-            );
-
-            box.appendChild(pre);
-
-
-            const button =
+            const label =
                 document.createElement(
-                    "button"
+                    "div"
                 );
 
-            button.className =
-                "copy-code";
+            label.className =
+                "label";
 
-            button.textContent =
-                "Copy";
+            label.textContent =
+                type === "user"
+                    ? "You"
+                    : "D-AI";
 
+            const content =
+                document.createElement(
+                    "div"
+                );
 
-            button.onclick =
-                async () => {
+            content.textContent =
+                text;
 
-                    await copyText(
-                        code.textContent
-                    );
-
-                    button.textContent =
-                        "Copied!";
-
-                    setTimeout(
-                        () => {
-                            button.textContent =
-                                "Copy";
-                        },
-                        1200
-                    );
-
-                };
-
-
-            box.appendChild(button);
-
-        });
-
-}
-
-
-/* =========================================================
-   COPY
-========================================================= */
-
-async function copyText(text){
-
-    try{
-
-        await navigator.clipboard.writeText(
-            text
-        );
-
-        showToast(
-            "Copied to clipboard."
-        );
-
-    }catch{
-
-        const area =
-            document.createElement(
-                "textarea"
+            wrapper.appendChild(
+                label
             );
 
-        area.value =
-            text;
-
-        document.body.appendChild(
-            area
-        );
-
-        area.select();
-
-        document.execCommand(
-            "copy"
-        );
-
-        area.remove();
-
-        showToast(
-            "Copied to clipboard."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ADD MESSAGE
-========================================================= */
-
-function addLocalMessage(
-    role,
-    content
-){
-
-    const chat =
-        getActiveChat();
-
-    if(!chat){
-        return;
-    }
-
-    chat.messages.push({
-
-        role,
-
-        content,
-
-        timestamp:now()
-
-    });
-
-    chat.updatedAt =
-        now();
-
-    if(
-        role === "user" &&
-        (
-            chat.title ===
-            "New chat"
-            ||
-            !chat.title
-        )
-    ){
-
-        chat.title =
-            generateTitle(
+            wrapper.appendChild(
                 content
             );
 
-    }
+            chat.appendChild(
+                wrapper
+            );
 
-    save();
+            chat.scrollTop =
+                chat.scrollHeight;
 
-}
-
-
-/* =========================================================
-   THINKING
-========================================================= */
-
-function showThinking(){
-
-    removeThinking();
-
-    const element =
-        document.createElement("div");
-
-    element.className =
-        "thinking";
-
-    element.id =
-        "thinking";
-
-
-    element.innerHTML = `
-
-        <div class="avatar avatar-ai">
-            ✦
-        </div>
-
-        <div class="thinking-text">
-
-            <span>Thinking</span>
-
-            <span class="thinking-dot"></span>
-            <span class="thinking-dot"></span>
-            <span class="thinking-dot"></span>
-
-        </div>
-
-    `;
-
-
-    messages.appendChild(
-        element
-    );
-
-    scrollBottom();
-
-}
-
-
-function removeThinking(){
-
-    const element =
-        document.getElementById(
-            "thinking"
-        );
-
-    if(element){
-        element.remove();
-    }
-
-}
-
-
-/* =========================================================
-   SCROLL
-========================================================= */
-
-function scrollBottom(
-    smooth=true
-){
-
-    requestAnimationFrame(
-        () => {
-
-            chatScroll.scrollTo({
-
-                top:
-                    chatScroll.scrollHeight,
-
-                behavior:
-                    smooth
-                        ? "smooth"
-                        : "auto"
-
-            });
-
+            return content;
         }
-    );
-
-}
 
 
-/* =========================================================
-   SEND
-========================================================= */
+        // ====================================================
+        // STREAM CHAT
+        // ====================================================
 
-async function send(){
+        async function sendMessage(
+            message
+        ) {
 
-    if(sending){
-        return;
-    }
+            const userContent =
+                addMessage(
+                    message,
+                    "user"
+                );
 
-    const text =
-        input.value.trim();
+            const assistantContent =
+                addMessage(
+                    "",
+                    "assistant"
+                );
 
-    if(!text){
-        return;
-    }
+            sendButton.disabled =
+                true;
 
-
-    let chat =
-        getActiveChat();
-
-    if(!chat){
-
-        chat =
-            createChat();
-
-    }
+            input.disabled =
+                true;
 
 
-    sending =
-        true;
+            try {
 
-    input.value =
-        "";
+                const response =
+                    await fetch(
+                        "/chat",
+                        {
+                            method: "POST",
 
-    autoResize();
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-
-    input.disabled =
-        true;
-
-    sendButton.style.display =
-        "none";
-
-    stopButton.style.display =
-        "flex";
-
-
-    addLocalMessage(
-        "user",
-        text
-    );
+                            body: JSON.stringify({
+                                message,
+                                sessionId
+                            })
+                        }
+                    );
 
 
-    renderChatList();
+                if (!response.ok) {
 
-    renderMessages();
+                    let errorText =
+                        "Something went wrong.";
 
-    showThinking();
+                    try {
 
-    setConnection(
-        "Thinking...",
-        true
-    );
+                        const data =
+                            await response.json();
+
+                        errorText =
+                            data.reply ||
+                            errorText;
+
+                    } catch {}
+
+                    assistantContent.textContent =
+                        errorText;
+
+                    return;
+                }
 
 
-    currentController =
-        new AbortController();
+                // =================================================
+                // READ STREAM
+                // =================================================
+
+                const reader =
+                    response.body.getReader();
+
+                const decoder =
+                    new TextDecoder();
+
+                let buffer = "";
+
+                let finished =
+                    false;
 
 
-    try{
+                while (!finished) {
 
-        const response =
-            await fetch(
-                "/chat",
-                {
-                    method:"POST",
+                    const {
+                        value,
+                        done
+                    } =
+                        await reader.read();
 
-                    headers:{
-                        "Content-Type":
-                            "application/json"
-                    },
 
-                    body:JSON.stringify({
+                    if (done) {
+                        break;
+                    }
 
-                        message:text,
 
-                        sessionId:
-                            chat.sessionId
+                    buffer +=
+                        decoder.decode(
+                            value,
+                            {
+                                stream: true
+                            }
+                        );
 
-                    }),
 
-                    signal:
-                        currentController.signal
+                    const events =
+                        buffer.split(
+                            "\n\n"
+                        );
+
+
+                    buffer =
+                        events.pop();
+
+
+                    for (
+                        const event
+                        of events
+                    ) {
+
+                        const lines =
+                            event.split(
+                                "\n"
+                            );
+
+
+                        for (
+                            const line
+                            of lines
+                        ) {
+
+                            if (
+                                !line.startsWith(
+                                    "data:"
+                                )
+                            ) {
+                                continue;
+                            }
+
+
+                            const json =
+                                line
+                                    .slice(5)
+                                    .trim();
+
+
+                            if (!json) {
+                                continue;
+                            }
+
+
+                            try {
+
+                                const data =
+                                    JSON.parse(
+                                        json
+                                    );
+
+
+                                // -----------------------------
+                                // TEXT CHUNK
+                                // -----------------------------
+
+                                if (
+                                    typeof data.content ===
+                                    "string"
+                                ) {
+
+                                    assistantContent.textContent +=
+                                        data.content;
+
+                                    chat.scrollTop =
+                                        chat.scrollHeight;
+                                }
+
+
+                                // -----------------------------
+                                // FINISHED
+                                // -----------------------------
+
+                                if (
+                                    data.done
+                                ) {
+
+                                    finished =
+                                        true;
+
+                                    break;
+                                }
+
+
+                                // -----------------------------
+                                // ERROR
+                                // -----------------------------
+
+                                if (
+                                    data.error
+                                ) {
+
+                                    assistantContent.textContent +=
+                                        "\n\n" +
+                                        data.error;
+
+                                    finished =
+                                        true;
+
+                                    break;
+                                }
+
+                            } catch {
+                                // Ignore malformed/incomplete event
+                            }
+
+                        }
+
+                    }
 
                 }
-            );
 
+            } catch (error) {
 
-        let data;
+                console.error(
+                    error
+                );
 
-        try{
+                assistantContent.textContent =
+                    "Couldn't connect to D-AI.";
 
-            data =
-                await response.json();
+            } finally {
 
-        }catch{
+                sendButton.disabled =
+                    false;
 
-            throw new Error(
-                "The server returned an invalid response."
-            );
+                input.disabled =
+                    false;
 
-        }
+                input.focus();
 
-
-        if(!response.ok){
-
-            throw new Error(
-                data.reply ||
-                "The request failed."
-            );
+            }
 
         }
 
 
-        const reply =
-            data.reply ||
-            "I didn't receive a response.";
+        // ====================================================
+        // FORM
+        // ====================================================
 
+        form.addEventListener(
+            "submit",
+            async (event) => {
 
-        removeThinking();
+                event.preventDefault();
 
+                const message =
+                    input.value.trim();
 
-        addLocalMessage(
-            "assistant",
-            reply
-        );
-
-
-        renderMessages();
-
-        renderChatList();
-
-
-        setConnection(
-            "Ready",
-            true
-        );
-
-
-    }catch(error){
-
-        removeThinking();
-
-
-        if(
-            error.name ===
-            "AbortError"
-        ){
-
-            addLocalMessage(
-                "assistant",
-                "Generation stopped."
-            );
-
-        }else{
-
-            addLocalMessage(
-                "assistant",
-                "⚠️ " +
-                (
-                    error.message ||
-                    "Something went wrong."
-                )
-            );
-
-            setConnection(
-                "Connection issue",
-                false
-            );
-
-        }
-
-
-        renderMessages();
-
-    }finally{
-
-        sending =
-            false;
-
-        currentController =
-            null;
-
-        input.disabled =
-            false;
-
-        sendButton.style.display =
-            "flex";
-
-        stopButton.style.display =
-            "none";
-
-        input.focus();
-
-    }
-
-}
-
-
-/* =========================================================
-   STOP
-========================================================= */
-
-function stopGeneration(){
-
-    if(
-        currentController
-    ){
-
-        currentController.abort();
-
-    }
-
-}
-
-
-stopButton.onclick =
-    stopGeneration;
-
-
-/* =========================================================
-   REGENERATE
-========================================================= */
-
-async function regenerateResponse(
-    index
-){
-
-    if(sending){
-        return;
-    }
-
-    const chat =
-        getActiveChat();
-
-    if(!chat){
-        return;
-    }
-
-
-    if(
-        chat.messages[index]?.role !==
-        "assistant"
-    ){
-
-        return;
-
-    }
-
-
-    const previousUser =
-        chat.messages
-            .slice(0,index)
-            .reverse()
-            .find(
-                item =>
-                    item.role === "user"
-            );
-
-
-    if(!previousUser){
-        return;
-    }
-
-
-    chat.messages =
-        chat.messages.slice(
-            0,
-            index
-        );
-
-    save();
-
-    renderMessages();
-
-
-    input.value =
-        "";
-
-    await requestAssistant(
-        previousUser.content
-    );
-
-}
-
-
-/* =========================================================
-   ASSISTANT REQUEST
-========================================================= */
-
-async function requestAssistant(
-    text
-){
-
-    const chat =
-        getActiveChat();
-
-    if(!chat){
-        return;
-    }
-
-
-    sending =
-        true;
-
-    input.disabled =
-        true;
-
-    sendButton.style.display =
-        "none";
-
-    stopButton.style.display =
-        "flex";
-
-
-    showThinking();
-
-    setConnection(
-        "Thinking...",
-        true
-    );
-
-
-    currentController =
-        new AbortController();
-
-
-    try{
-
-        const response =
-            await fetch(
-                "/chat",
-                {
-                    method:"POST",
-
-                    headers:{
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:JSON.stringify({
-
-                        message:text,
-
-                        sessionId:
-                            chat.sessionId
-
-                    }),
-
-                    signal:
-                        currentController.signal
-
+                if (!message) {
+                    return;
                 }
-            );
 
+                input.value = "";
 
-        const data =
-            await response.json();
+                await sendMessage(
+                    message
+                );
 
-
-        if(!response.ok){
-
-            throw new Error(
-                data.reply ||
-                "The request failed."
-            );
-
-        }
-
-
-        removeThinking();
-
-
-        addLocalMessage(
-            "assistant",
-            data.reply ||
-            "I didn't receive a response."
-        );
-
-
-        renderMessages();
-
-        renderChatList();
-
-        setConnection(
-            "Ready",
-            true
-        );
-
-
-    }catch(error){
-
-        removeThinking();
-
-
-        if(
-            error.name ===
-            "AbortError"
-        ){
-
-            addLocalMessage(
-                "assistant",
-                "Generation stopped."
-            );
-
-        }else{
-
-            addLocalMessage(
-                "assistant",
-                "⚠️ " +
-                (
-                    error.message ||
-                    "Something went wrong."
-                )
-            );
-
-            setConnection(
-                "Connection issue",
-                false
-            );
-
-        }
-
-
-        renderMessages();
-
-    }finally{
-
-        sending =
-            false;
-
-        currentController =
-            null;
-
-        input.disabled =
-            false;
-
-        sendButton.style.display =
-            "flex";
-
-        stopButton.style.display =
-            "none";
-
-        input.focus();
-
-    }
-
-}
-
-
-/* =========================================================
-   EDIT MESSAGE
-========================================================= */
-
-function editMessage(index){
-
-    const chat =
-        getActiveChat();
-
-    if(!chat){
-        return;
-    }
-
-
-    const message =
-        chat.messages[index];
-
-    if(
-        !message ||
-        message.role !== "user"
-    ){
-        return;
-    }
-
-
-    input.value =
-        message.content;
-
-    autoResize();
-
-    input.focus();
-
-
-    chat.messages =
-        chat.messages.slice(
-            0,
-            index
-        );
-
-    save();
-
-    renderMessages();
-
-}
-
-
-/* =========================================================
-   NEW CHAT
-========================================================= */
-
-async function newChat(){
-
-    if(sending){
-
-        showToast(
-            "Stop the current response first."
-        );
-
-        return;
-
-    }
-
-
-    const current =
-        getActiveChat();
-
-
-    if(
-        current &&
-        current.messages.length === 0
-    ){
-
-        closeSidebar();
-
-        input.focus();
-
-        return;
-
-    }
-
-
-    createChat();
-
-    closeSidebar();
-
-}
-
-
-/* =========================================================
-   RESET SERVER SESSION
-========================================================= */
-
-async function resetServerSession(
-    chat
-){
-
-    if(!chat){
-        return;
-    }
-
-    try{
-
-        await fetch(
-            "/reset",
-            {
-                method:"POST",
-
-                headers:{
-                    "Content-Type":
-                        "application/json"
-                },
-
-                body:JSON.stringify({
-                    sessionId:
-                        chat.sessionId
-                })
             }
         );
 
-    }catch{
 
-        // Local UI still works.
+        // ====================================================
+        // ENTER TO SEND
+        // SHIFT+ENTER = NEW LINE
+        // ====================================================
 
-    }
+        input.addEventListener(
+            "keydown",
+            (event) => {
 
-}
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
 
+                    event.preventDefault();
 
-/* =========================================================
-   WELCOME SUGGESTIONS
-========================================================= */
+                    form.requestSubmit();
+                }
 
-const SUGGESTIONS = [
-
-    {
-        icon:"⌘",
-        title:"Help me write some code",
-        description:"Build or debug something"
-    },
-
-    {
-        icon:"?",
-        title:"Explain something simply",
-        description:"Break down a difficult topic"
-    },
-
-    {
-        icon:"✎",
-        title:"Help me write",
-        description:"Messages, essays and ideas"
-    },
-
-    {
-        icon:"◇",
-        title:"Give me some ideas",
-        description:"Projects, websites and more"
-    },
-
-    {
-        icon:"∑",
-        title:"Help me solve a problem",
-        description:"Work through it together"
-    },
-
-    {
-        icon:"◎",
-        title:"Teach me something",
-        description:"Learn a new skill"
-    }
-
-];
-
-
-function shuffle(array){
-
-    return [...array]
-        .sort(
-            () =>
-                Math.random() -
-                .5
-        );
-
-}
-
-
-function buildWelcome(){
-
-    welcomeGrid.innerHTML = "";
-
-
-    shuffle(SUGGESTIONS)
-        .slice(0,4)
-        .forEach(item => {
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.className =
-                "welcome-card";
-
-
-            button.innerHTML = `
-
-                <span class="card-icon">
-                    ${item.icon}
-                </span>
-
-                <span class="card-title">
-                    ${escapeHTML(item.title)}
-                </span>
-
-                <div class="card-description">
-                    ${escapeHTML(item.description)}
-                </div>
-
-            `;
-
-
-            button.onclick =
-                () => {
-
-                    input.value =
-                        item.title;
-
-                    autoResize();
-
-                    input.focus();
-
-                };
-
-
-            welcomeGrid.appendChild(
-                button
-            );
-
-        });
-
-}
-
-
-/* =========================================================
-   TEXTAREA
-========================================================= */
-
-function autoResize(){
-
-    input.style.height =
-        "auto";
-
-    input.style.height =
-        Math.min(
-            input.scrollHeight,
-            180
-        ) +
-        "px";
-
-}
-
-
-input.addEventListener(
-    "input",
-    autoResize
-);
-
-
-/* =========================================================
-   ENTER
-========================================================= */
-
-input.addEventListener(
-    "keydown",
-    event => {
-
-        if(
-            event.key === "Enter" &&
-            !event.shiftKey &&
-            enterToSend
-        ){
-
-            event.preventDefault();
-
-            send();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   SEND BUTTON
-========================================================= */
-
-sendButton.onclick =
-    send;
-
-
-/* =========================================================
-   MOBILE SIDEBAR
-========================================================= */
-
-function openSidebar(){
-
-    sidebar.classList.add(
-        "open"
-    );
-
-    overlay.style.display =
-        "block";
-
-}
-
-
-function closeSidebar(){
-
-    sidebar.classList.remove(
-        "open"
-    );
-
-    overlay.style.display =
-        "none";
-
-}
-
-
-menuButton.onclick =
-    openSidebar;
-
-overlay.onclick =
-    closeSidebar;
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-chatSearch.addEventListener(
-    "input",
-    renderChatList
-);
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-function updateToggle(){
-
-    document
-        .getElementById("enterToggle")
-        .classList.toggle(
-            "on",
-            enterToSend
+            }
         );
 
 
-    document
-        .getElementById("saveToggle")
-        .classList.toggle(
-            "on",
-            saveChats
+        // ====================================================
+        // AUTO RESIZE
+        // ====================================================
+
+        input.addEventListener(
+            "input",
+            () => {
+
+                input.style.height =
+                    "auto";
+
+                input.style.height =
+                    Math.min(
+                        input.scrollHeight,
+                        180
+                    ) + "px";
+
+            }
         );
 
-}
-
-
-settingsButton.onclick =
-    () => {
-
-        updateToggle();
-
-        settingsModal.style.display =
-            "flex";
-
-    };
-
-
-document
-    .getElementById("settingsClose")
-    .onclick =
-    () => {
-
-        settingsModal.style.display =
-            "none";
-
-    };
-
-
-document
-    .getElementById("enterToggle")
-    .onclick =
-    () => {
-
-        enterToSend =
-            !enterToSend;
-
-        localStorage.setItem(
-            ENTER_KEY,
-            enterToSend
-        );
-
-        updateToggle();
-
-    };
-
-
-document
-    .getElementById("saveToggle")
-    .onclick =
-    () => {
-
-        saveChats =
-            !saveChats;
-
-        localStorage.setItem(
-            SAVE_KEY,
-            saveChats
-        );
-
-        updateToggle();
-
-        if(saveChats){
-
-            save();
-
-            showToast(
-                "Chat saving enabled."
-            );
-
-        }else{
-
-            showToast(
-                "Chat saving disabled."
-            );
-
-        }
-
-    };
-
-
-document
-    .getElementById("clearAllButton")
-    .onclick =
-    async () => {
-
-        if(!confirm(
-            "Delete every locally saved D-AI chat?"
-        )){
-
-            return;
-
-        }
-
-
-        chats = [];
-
-        activeChatId =
-            null;
-
-        localStorage.removeItem(
-            STORAGE_KEY
-        );
-
-        localStorage.removeItem(
-            ACTIVE_KEY
-        );
-
-
-        if(
-            getActiveChat()
-        ){
-
-            await resetServerSession(
-                getActiveChat()
-            );
-
-        }
-
-
-        createChat();
-
-        renderChatList();
-
-        renderMessages();
-
-        showToast(
-            "All local chats cleared."
-        );
-
-    };
-
-
-/* =========================================================
-   MODAL CLOSE
-========================================================= */
-
-settingsModal.addEventListener(
-    "click",
-    event => {
-
-        if(
-            event.target ===
-            settingsModal
-        ){
-
-            settingsModal.style.display =
-                "none";
-
-        }
-
-    }
-);
-
-
-renameModal.addEventListener(
-    "click",
-    event => {
-
-        if(
-            event.target ===
-            renameModal
-        ){
-
-            closeRename();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   CONNECTION
-========================================================= */
-
-function setConnection(
-    text,
-    online
-){
-
-    connectionText.textContent =
-        text;
-
-    connectionDot.classList.toggle(
-        "offline",
-        !online
-    );
-
-}
-
-
-/* =========================================================
-   ESCAPE
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if(event.key !== "Escape"){
-            return;
-        }
-
-        closeSidebar();
-
-        settingsModal.style.display =
-            "none";
-
-        closeRename();
-
-    }
-);
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-loadChats();
-
-loadActive();
-
-
-if(!chats.length){
-
-    createChat();
-
-}else{
-
-    if(!activeChatId){
-
-        activeChatId =
-            chats[0].id;
-
-    }
-
-    renderChatList();
-
-    renderMessages();
-
-}
-
-
-buildWelcome();
-
-updateToggle();
-
-autoResize();
-
-setConnection(
-    "Ready",
-    true
-);
-
-input.focus();
-
-</script>
+    </script>
 
 </body>
+
 </html>
